@@ -93,6 +93,7 @@ class Sidebar extends StatelessWidget {
             active: current == AdminSection.users,
             onTap: () => Navigator.pushReplacementNamed(context, Routes.users),
           ),
+          const SizedBox(height: 30),
           navButton(
             label: 'Проекты',
             iconAsset: 'assets/icons/projects.svg',
@@ -104,6 +105,7 @@ class Sidebar extends StatelessWidget {
                 );
               }
           ),
+          const SizedBox(height: 30),
           navButton(
             label: 'Портфолио',
             iconAsset: 'assets/icons/portfolio.svg',
