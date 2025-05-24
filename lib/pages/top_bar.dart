@@ -10,7 +10,7 @@ class TopBar extends StatelessWidget {
   Widget build(BuildContext context) {
     return Material(
       elevation: 2,
-      color: Colors.white,
+      color: Palette.white,
       child: Container(
         height: 90,
         padding: const EdgeInsets.only(left: 50, right: 24),
@@ -31,13 +31,13 @@ class TopBar extends StatelessWidget {
               child: ConstrainedBox(
                 constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width - (50 + 24 + 50 + 75 + 24)),
                 child: Container(
-                  height: 54,
+                  height: 50,
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: Palette.white,
                     borderRadius: BorderRadius.circular(24),
                     boxShadow: const [
                       BoxShadow(
-                        color: Colors.black12,
+                        color: Palette.black1,
                         blurRadius: 8,
                         offset: Offset(0, 2),
                       )
