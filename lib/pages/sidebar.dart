@@ -23,8 +23,8 @@ class Sidebar extends StatelessWidget {
       Color? textColor,
       Color? iconColor,
     }) {
-      final fgText = active ? Colors.white : (textColor ?? Palette.black);
-      final fgIcon = active ? Colors.white : (iconColor ?? Palette.black);
+      final fgText = active ? Palette.white : (textColor ?? Palette.black);
+      final fgIcon = active ? Palette.white : (iconColor ?? Palette.black);
 
       return Padding(
         padding: const EdgeInsets.symmetric(vertical: 8),
@@ -37,7 +37,7 @@ class Sidebar extends StatelessWidget {
               width: double.infinity,
               padding: const EdgeInsets.symmetric(vertical: 12),
               decoration: BoxDecoration(
-                color: active ? Palette.primary : Colors.white,
+                color: active ? Palette.primary : Palette.white,
                 borderRadius: BorderRadius.circular(8),
                 border: active ? null : Border.all(color: Palette.grey7),
               ),
@@ -71,9 +71,9 @@ class Sidebar extends StatelessWidget {
       height: double.infinity,
       padding: const EdgeInsets.fromLTRB(19, 50, 19, 25),
       decoration: const BoxDecoration(
-        color: Colors.white,
+        color: Palette.white,
         boxShadow: [
-          BoxShadow(color: Colors.black12, blurRadius: 8, offset: Offset(2, 0)),
+          BoxShadow(color: Palette.black1, blurRadius: 8, offset: Offset(2, 0)),
         ],
       ),
       child: Column(
