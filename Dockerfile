@@ -1,4 +1,4 @@
-FROM cirrusci/flutter:3.29.3 AS builder
+FROM ghcr.io/flutter/flutter:3.29.3 AS builder
 WORKDIR /app
 COPY . .
 RUN flutter pub get
