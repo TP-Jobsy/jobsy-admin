@@ -12,7 +12,7 @@ class TopBar extends StatelessWidget {
       elevation: 2,
       color: Palette.white,
       child: Container(
-        height: 90,
+        height: 110,
         padding: const EdgeInsets.only(left: 50, right: 24),
         child: Row(
           children: [
