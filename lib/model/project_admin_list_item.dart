@@ -14,12 +14,16 @@ class ProjectAdminListItem {
   });
 
   factory ProjectAdminListItem.fromJson(Map<String, dynamic> json) {
+    final clientJson = json['client'];
     return ProjectAdminListItem(
       id: (json['id'] as num).toInt(),
       title: json['title'] as String,
       createdAt: DateTime.parse(json['createdAt'] as String),
       status: json['status'] as String,
-      client: ClientInfo.fromJson(json['client'] as Map<String, dynamic>),
+      client:
+          clientJson != null
+              ? ClientInfo.fromJson(clientJson as Map<String, dynamic>)
+              : ClientInfo(firstName: '-', lastName: '-'),
     );
   }
 }
@@ -28,10 +32,7 @@ class ClientInfo {
   final String firstName;
   final String lastName;
 
-  ClientInfo({
-    required this.firstName,
-    required this.lastName,
-  });
+  ClientInfo({required this.firstName, required this.lastName});
 
   factory ClientInfo.fromJson(Map<String, dynamic> json) {
     return ClientInfo(

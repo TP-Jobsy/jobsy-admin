@@ -1,14 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:jobsy_admin/pages/login_page.dart';
 import 'package:jobsy_admin/pages/portfolio_page.dart';
+import 'package:jobsy_admin/pages/project_detail_page.dart';
 import 'package:jobsy_admin/pages/projects_page.dart';
 import 'package:jobsy_admin/pages/user_detail_page.dart';
 import 'package:jobsy_admin/pages/users_screen.dart';
 import 'package:jobsy_admin/provider/auth_provider.dart';
 import 'package:jobsy_admin/util/routes.dart';
 import 'package:provider/provider.dart';
-
-import 'model/project/project.dart';
 
 void main() {
   runApp(

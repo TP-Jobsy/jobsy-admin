@@ -41,10 +41,9 @@ class ProjectsPage extends StatelessWidget {
           DataCell(IconButton(
             icon: const Icon(Icons.arrow_forward_ios, size: 16),
             onPressed: () async {
-              final fullProject = await adminService.getProjectById(token!, p.id);
               Navigator.of(context).push(
                 MaterialPageRoute(
-                  builder: (_) => ProjectDetailPage(project: fullProject),
+                  builder: (_) => ProjectDetailPage(projectId: p.id),
                 ),
               );
             },
