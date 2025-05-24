@@ -1,7 +1,7 @@
-FROM dart:stable AS builder
+FROM cirrusci/flutter:3.29.3 AS builder
 WORKDIR /app
 COPY . .
-RUN dart pub get
+RUN flutter pub get
 RUN flutter build web
 
 FROM nginx:alpine
