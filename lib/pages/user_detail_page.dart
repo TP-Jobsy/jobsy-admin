@@ -5,6 +5,7 @@ import '../model/client/client_profile.dart';
 import '../model/free/freelancer_profile.dart';
 import '../provider/auth_provider.dart';
 import '../service/admin_service.dart';
+import '../util/palette.dart';
 import 'admin_layout.dart';
 import 'client_detail_content.dart';
 import 'freelancer_detail_content.dart';
@@ -42,7 +43,7 @@ class _UserDetailPageState extends State<UserDetailPage> {
           .getClientById(token, int.parse(widget.userId))
           .then((p) => setState(() => _clientProfile = p))
           .catchError((e) {
-        // TODO:  показать ErrorSnackbar
+        // TODO: показать ErrorSnackbar
       })
           .whenComplete(() => setState(() => _loading = false));
     } else {
@@ -58,21 +59,28 @@ class _UserDetailPageState extends State<UserDetailPage> {
 
   @override
   Widget build(BuildContext context) {
-    return AdminLayout(
-      currentSection: AdminSection.users,
-      child: _loading
-          ? const Center(child: CircularProgressIndicator())
-          : _buildContent(),
+    return Scaffold(
+      backgroundColor: Palette.white,
+      body: AdminLayout(
+        currentSection: AdminSection.users,
+        child: Container(
+          color: Palette.white,
+          child: _loading
+              ? const Center(child: CircularProgressIndicator())
+              : _buildContent(),
+        ),
+      ),
     );
   }
 
   Widget _buildContent() {
-    if (isClient && _clientProfile != null) {
-      return ClientDetailContent(client: _clientProfile!);
-    }
-    if (!isClient && _freelancerProfile != null) {
-      return FreelancerDetailContent(freelancer: _freelancerProfile!);
-    }
-    return const Center(child: Text('Профиль не найден'));
+    return Container(
+      color: Colors.white,
+      child: isClient && _clientProfile != null
+          ? ClientDetailContent(client: _clientProfile!)
+          : !isClient && _freelancerProfile != null
+          ? FreelancerDetailContent(freelancer: _freelancerProfile!)
+          : const Center(child: Text('Профиль не найден')),
+    );
   }
 }
