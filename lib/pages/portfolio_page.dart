@@ -21,11 +21,11 @@ class PortfoliosPage extends StatelessWidget {
           ? Future.value(<PortfolioAdminListItem>[])
           : adminService.fetchPortfoliosPage(token, 0, 100).then((resp) => resp.content),
       columns: const [
-        DataColumn(label: Text('Id')),
-        DataColumn(label: Text('Название')),
-        DataColumn(label: Text('Фрилансер')),
-        DataColumn(label: Text('Дата создания')),
-        DataColumn(label: Text('Подробнее')),
+        DataColumn(label: Text('Id', style: TextStyle(fontWeight: FontWeight.w900, fontFamily: 'Inter', fontSize: 16))),
+        DataColumn(label: Text('Название', style: TextStyle(fontWeight: FontWeight.w900, fontFamily: 'Inter', fontSize: 16))),
+        DataColumn(label: Text('Фрилансер', style: TextStyle(fontWeight: FontWeight.w900, fontFamily: 'Inter', fontSize: 16))),
+        DataColumn(label: Text('Дата создания', style: TextStyle(fontWeight: FontWeight.w900, fontFamily: 'Inter', fontSize: 16))),
+        DataColumn(label: Text('Подробнее', style: TextStyle(fontWeight: FontWeight.w900, fontFamily: 'Inter', fontSize: 16))),
       ],
       buildRow: (p) {
         final date = '${p.createdAt.day.toString().padLeft(2, '0')}.'
