@@ -37,13 +37,13 @@ class UsersPage extends StatelessWidget {
                         }).toList(),
                   ),
       columns: const [
-        DataColumn(label: Text('Id')),
-        DataColumn(label: Text('Имя')),
-        DataColumn(label: Text('Фамилия')),
-        DataColumn(label: Text('Роль')),
-        DataColumn(label: Text('Статус')),
-        DataColumn(label: Text('Дата регистрации')),
-        DataColumn(label: Text('Подробнее')),
+        DataColumn(label: Text('Id', style: TextStyle(fontWeight: FontWeight.w900, fontFamily: 'Inter', fontSize: 16))),
+        DataColumn(label: Text('Имя', style: TextStyle(fontWeight: FontWeight.w900, fontFamily: 'Inter', fontSize: 16))),
+        DataColumn(label: Text('Фамилия', style: TextStyle(fontWeight: FontWeight.w900, fontFamily: 'Inter', fontSize: 16))),
+        DataColumn(label: Text('Роль', style: TextStyle(fontWeight: FontWeight.w900, fontFamily: 'Inter', fontSize: 16))),
+        DataColumn(label: Text('Статус', style: TextStyle(fontWeight: FontWeight.w900, fontFamily: 'Inter', fontSize: 16))),
+        DataColumn(label: Text('Дата регистрации', style: TextStyle(fontWeight: FontWeight.w900, fontFamily: 'Inter', fontSize: 16))),
+        DataColumn(label: Text('Подробнее', style: TextStyle(fontWeight: FontWeight.w900, fontFamily: 'Inter', fontSize: 16))),
       ],
       buildRow: (u) {
         final d = u.registeredAt;
