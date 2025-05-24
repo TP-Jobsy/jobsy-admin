@@ -1,0 +1,62 @@
+name: Flutter Web Admin CI/CD
+
+on:
+  push:
+    branches:
+      - master
+      - develop
+  workflow_dispatch:
+
+env:
+  IMAGE_NAME: ${{ secrets.DOCKER_HUB_USERNAME }}/jobsy-admin
+
+jobs:
+  build-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: "3.19.6"
+
+      - name: Install dependencies
+        run: flutter pub get
+        working-directory: admin_panel
+
+      - name: Build Flutter Web
+        run: flutter build web
+        working-directory: admin_panel
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_HUB_USERNAME }}
+          password: ${{ secrets.DOCKER_HUB_TOKEN }}
+
+      - name: Build Docker image
+        run: |
+          docker build -t jonshilin/jobsy_admin:latest .
+        working-directory: admin_panel
+
+      - name: Push Docker image
+        run: docker push jonshilin/jobsy_admin:latest
+
+      - name: Set up SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          eval $(ssh-agent -s)
+          ssh-keyscan -H ${{ secrets.SERVER_IP }} >> ~/.ssh/known_hosts
+
+      - name: Deploy via SSH
+        run: |
+          ssh ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }} << EOF
+            docker pull jonshilin/jobsy_admin:latest
+            docker compose -f ${{ secrets.APP_PATH }}/docker-compose.yml up -d flutter-admin
+            docker system prune -f
+          EOF
