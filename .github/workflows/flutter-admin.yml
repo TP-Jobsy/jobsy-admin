@@ -2,13 +2,9 @@ name: Flutter Web Admin CI/CD
 
 on:
   push:
-    branches:
-      - master
-      - develop
-  workflow_dispatch:
-
-env:
-  IMAGE_NAME: ${{ secrets.DOCKER_HUB_USERNAME }}/jobsy-admin
+    branches: [ master, develop ]
+  pull_request:
+    branches: [ master, develop ]
 
 jobs:
   build-deploy:
@@ -25,11 +21,9 @@ jobs:
 
       - name: Install dependencies
         run: flutter pub get
-        working-directory: admin_panel
 
       - name: Build Flutter Web
         run: flutter build web
-        working-directory: admin_panel
 
       - name: Log in to Docker Hub
         uses: docker/login-action@v2
@@ -38,9 +32,7 @@ jobs:
           password: ${{ secrets.DOCKER_HUB_TOKEN }}
 
       - name: Build Docker image
-        run: |
-          docker build -t jonshilin/jobsy_admin:latest .
-        working-directory: admin_panel
+        run: docker build -t jonshilin/jobsy_admin:latest .
 
       - name: Push Docker image
         run: docker push jonshilin/jobsy_admin:latest
