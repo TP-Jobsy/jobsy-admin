@@ -26,12 +26,12 @@ class ProjectsPage extends StatelessWidget {
                   .fetchProjectsPage(token, 0, 100)
                   .then((resp) => resp.content),
       columns: const [
-        DataColumn(label: Text('Id')),
-        DataColumn(label: Text('Название')),
-        DataColumn(label: Text('Клиент')),
-        DataColumn(label: Text('Статус')),
-        DataColumn(label: Text('Дата создания')),
-        DataColumn(label: Text('Подробнее')),
+        DataColumn(label: Text('Id', style: TextStyle(fontWeight: FontWeight.w900, fontFamily: 'Inter', fontSize: 16))),
+        DataColumn(label: Text('Название', style: TextStyle(fontWeight: FontWeight.w900, fontFamily: 'Inter', fontSize: 16))),
+        DataColumn(label: Text('Клиент', style: TextStyle(fontWeight: FontWeight.w900, fontFamily: 'Inter', fontSize: 16))),
+        DataColumn(label: Text('Статус', style: TextStyle(fontWeight: FontWeight.w900, fontFamily: 'Inter', fontSize: 16))),
+        DataColumn(label: Text('Дата создания', style: TextStyle(fontWeight: FontWeight.w900, fontFamily: 'Inter', fontSize: 16))),
+        DataColumn(label: Text('Подробнее', style: TextStyle(fontWeight: FontWeight.w900, fontFamily: 'Inter', fontSize: 16))),
       ],
       buildRow: (p) {
         final date =
