@@ -69,7 +69,7 @@ class Sidebar extends StatelessWidget {
     return Container(
       width: 198,
       height: double.infinity,
-      padding: const EdgeInsets.fromLTRB(19, 50, 19, 25),
+      padding: const EdgeInsets.fromLTRB(19, 20, 19, 25),
       decoration: const BoxDecoration(
         color: Palette.white,
         boxShadow: [
