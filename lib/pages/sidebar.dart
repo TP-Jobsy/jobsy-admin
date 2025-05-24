@@ -1,6 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:jobsy_admin/pages/projects_page.dart';
+import 'package:provider/provider.dart';
+
 import '../../util/palette.dart';
+import '../provider/auth_provider.dart';
+import '../util/routes.dart';
 
 enum AdminSection { users, projects, portfolio }
 
@@ -13,7 +18,7 @@ class Sidebar extends StatelessWidget {
     Widget navButton({
       required String label,
       required String iconAsset,
-      required String route,
+      VoidCallback? onTap,
       bool active = false,
       Color? textColor,
       Color? iconColor,
@@ -27,7 +32,7 @@ class Sidebar extends StatelessWidget {
           color: Colors.transparent,
           child: InkWell(
             borderRadius: BorderRadius.circular(8),
-            onTap: () => Navigator.pushReplacementNamed(context, route),
+            onTap: onTap,
             child: Container(
               width: double.infinity,
               padding: const EdgeInsets.symmetric(vertical: 12),
@@ -85,28 +90,37 @@ class Sidebar extends StatelessWidget {
           navButton(
             label: 'Пользователи',
             iconAsset: 'assets/icons/user.svg',
-            route: '/pages/users',
             active: current == AdminSection.users,
+            onTap: () => Navigator.pushReplacementNamed(context, Routes.users),
           ),
           navButton(
             label: 'Проекты',
             iconAsset: 'assets/icons/projects.svg',
-            route: '/pages/projects',
             active: current == AdminSection.projects,
+              onTap: () {
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (_) => const ProjectsPage()),
+                );
+              }
           ),
           navButton(
             label: 'Портфолио',
             iconAsset: 'assets/icons/portfolio.svg',
-            route: '/pages/portfolio',
             active: current == AdminSection.portfolio,
+            onTap: () => Navigator.pushReplacementNamed(context, Routes.portfolio),
           ),
           const Spacer(),
           navButton(
             label: 'Выйти',
             iconAsset: 'assets/icons/logout.svg',
-            route: '/pages/login',
             textColor: Palette.red,
             iconColor: Palette.red,
+            onTap: () async {
+              final auth = Provider.of<AdminAuthProvider>(context, listen: false);
+              await auth.logout();
+              Navigator.pushReplacementNamed(context, Routes.login);
+            },
           ),
         ],
       ),
