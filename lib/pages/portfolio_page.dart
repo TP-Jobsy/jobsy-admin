@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:provider/provider.dart';
 import 'package:jobsy_admin/pages/sidebar.dart';
 import 'package:jobsy_admin/pages/portfolio_detail_page.dart';
 import '../model/portfolio_admin_list_item.dart';
 import '../provider/auth_provider.dart';
 import '../service/admin_service.dart';
+import '../util/palette.dart';
 import 'abstract_table_page.dart';
 
 class PortfoliosPage extends StatelessWidget {
@@ -37,7 +39,12 @@ class PortfoliosPage extends StatelessWidget {
           DataCell(Text('${p.firstName} ${p.lastName}')),
           DataCell(Text(date)),
           DataCell(IconButton(
-            icon: const Icon(Icons.arrow_forward_ios, size: 16),
+            icon: SvgPicture.asset(
+              'assets/icons/ArrowRight.svg',
+              width: 16,
+              height: 16,
+              color: Palette.black,
+            ),
             onPressed: () {
               Navigator.of(context).push(
                 MaterialPageRoute(
