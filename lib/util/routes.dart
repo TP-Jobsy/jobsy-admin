@@ -4,4 +4,7 @@ class Routes {
   static const users = '/users';
   static const userDetail = '/users/detail';
   static const projects = '/projects';
+  static const projectDetail = '/projects/detail';
+  static const portfolio = '/portfolio';
+  static const portfolioDetail = '/portfolio/detail';
 }
