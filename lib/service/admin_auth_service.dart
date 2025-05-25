@@ -32,7 +32,7 @@ class AdminAuthService {
 
   Future<TokenRefreshResponse> refresh(TokenRefreshRequest req) {
     return _api.post<TokenRefreshResponse>(
-      '/auth/refresh',
+      '/admin/auth/refresh',
       body: req.toJson(),
       decoder:
           (json) => TokenRefreshResponse.fromJson(json as Map<String, dynamic>),
