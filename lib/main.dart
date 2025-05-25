@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:jobsy_admin/pages/login_page.dart';
 import 'package:jobsy_admin/pages/portfolio_page.dart';
-import 'package:jobsy_admin/pages/project_detail_page.dart';
 import 'package:jobsy_admin/pages/projects_page.dart';
 import 'package:jobsy_admin/pages/user_detail_page.dart';
 import 'package:jobsy_admin/pages/users_screen.dart';
@@ -9,7 +8,12 @@ import 'package:jobsy_admin/provider/auth_provider.dart';
 import 'package:jobsy_admin/util/routes.dart';
 import 'package:provider/provider.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  final authProvider = AdminAuthProvider(baseUrl: Routes.apiBase);
+  await authProvider.ensureLoaded();
+
   runApp(
     ChangeNotifierProvider(
       create: (_) => AdminAuthProvider(baseUrl: Routes.apiBase),
@@ -25,6 +29,13 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final auth = context.watch<AdminAuthProvider>();
+    if (!auth.isLoaded) {
+      return const MaterialApp(
+        home: Scaffold(
+          body: Center(child: CircularProgressIndicator()),
+        ),
+      );
+    }
     return MaterialApp(
       title: 'Jobsy Admin',
       theme: ThemeData(

@@ -13,6 +13,7 @@ class AdminAuthProvider with ChangeNotifier {
   final FlutterSecureStorage _secureStorage = const FlutterSecureStorage();
   late final AdminAuthService _service;
   late final ApiClient _apiClient;
+  bool get isLoaded => _isLoaded;
 
   bool _isLoaded = false;
 
@@ -101,6 +102,10 @@ class AdminAuthProvider with ChangeNotifier {
 
   Future<void> refreshTokens() async {
     if (_refreshToken == null) throw Exception("No refresh token");
+    if (_refreshExpiry != null && DateTime.now().isAfter(_refreshExpiry!)) {
+      await logout();
+      return;
+    }
     final req = TokenRefreshRequest(refreshToken: _refreshToken!);
     final resp = await _service.refresh(req);
     _token = resp.accessToken;
