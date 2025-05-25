@@ -39,7 +39,12 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Jobsy Admin',
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.white),
+        scaffoldBackgroundColor: Colors.white,
+        colorScheme: const ColorScheme.light(
+          background: Colors.white,
+          primary: Colors.black,
+        ),
+        useMaterial3: true,
       ),
       initialRoute: auth.isLoggedIn ? Routes.users : Routes.login,
       routes: {
