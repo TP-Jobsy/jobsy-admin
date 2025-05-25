@@ -5,19 +5,17 @@ import '../model/portfolio/portfolio.dart';
 import '../model/portfolio_admin_list_item.dart';
 import '../model/project/project.dart';
 import '../model/project_admin_list_item.dart';
-import '../util/routes.dart';
 import 'api_client.dart';
 
 class AdminService {
   final ApiClient _api;
 
-  AdminService({ApiClient? client})
-    : _api = client ?? ApiClient(baseUrl: Routes.apiBase);
+  AdminService({required ApiClient client}) : _api = client;
 
-  Future<List<FreelancerProfile>> getAllFreelancers(String token) async {
+  Future<List<FreelancerProfile>> getAllFreelancers() async {
     final json = await _api.get<List<dynamic>>(
       '/admin/freelancers',
-      token: token,
+      decoder: (data) => data,
     );
     return json!
         .cast<Map<String, dynamic>>()
@@ -25,65 +23,67 @@ class AdminService {
         .toList();
   }
 
-  Future<FreelancerProfile> getFreelancerById(String token, int userId) async {
+  Future<FreelancerProfile> getFreelancerById(int userId) async {
     final json = await _api.get<Map<String, dynamic>>(
       '/admin/freelancers/$userId',
-      token: token,
+      decoder: (data) => data,
     );
     return FreelancerProfile.fromJson(json!);
   }
 
-  Future<void> deleteFreelancer(String token, int userId) async {
-    await _api.delete<void>('/admin/freelancers/$userId', token: token);
+  Future<void> deleteFreelancer(int userId) async {
+    await _api.delete<void>('/admin/freelancers/$userId');
   }
 
-  Future<List<ClientProfile>> getAllClients(String token) async {
-    final json = await _api.get<List<dynamic>>('/admin/clients', token: token);
+  Future<List<ClientProfile>> getAllClients() async {
+    final json = await _api.get<List<dynamic>>(
+      '/admin/clients',
+      decoder: (data) => data,
+    );
     return json!
         .cast<Map<String, dynamic>>()
         .map(ClientProfile.fromJson)
         .toList();
   }
 
-  Future<ClientProfile> getClientById(String token, int userId) async {
+  Future<ClientProfile> getClientById(int userId) async {
     final json = await _api.get<Map<String, dynamic>>(
       '/admin/clients/$userId',
-      token: token,
+      decoder: (data) => data,
     );
     return ClientProfile.fromJson(json!);
   }
 
-  Future<void> deleteClient(String token, int userId) async {
-    await _api.delete<void>('/admin/clients/$userId', token: token);
+  Future<void> deleteClient(int userId) async {
+    await _api.delete<void>('/admin/clients/$userId');
   }
 
-  Future<List<Project>> getClientProjects(String token, int clientId) async {
+  Future<List<Project>> getClientProjects(int clientId) async {
     final json = await _api.get<List<dynamic>>(
       '/admin/clients/$clientId/projects',
-      token: token,
+      decoder: (data) => data,
     );
     return json!.cast<Map<String, dynamic>>().map(Project.fromJson).toList();
   }
 
-  Future<Project> getProjectById(String token, int projectId) async {
+  Future<Project> getProjectById(int projectId) async {
     final json = await _api.get<Map<String, dynamic>>(
       '/admin/projects/$projectId',
-      token: token,
+      decoder: (data) => data,
     );
     return Project.fromJson(json!);
   }
 
-  Future<void> deleteProject(String token, int projectId) async {
-    await _api.delete<void>('/admin/projects/$projectId', token: token);
+  Future<void> deleteProject(int projectId) async {
+    await _api.delete<void>('/admin/projects/$projectId');
   }
 
   Future<List<FreelancerPortfolio>> getFreelancerPortfolio(
-    String token,
     int freelancerId,
   ) async {
     final json = await _api.get<List<dynamic>>(
       '/admin/freelancers/$freelancerId/portfolio',
-      token: token,
+      decoder: (data) => data,
     );
     return json!
         .cast<Map<String, dynamic>>()
@@ -91,25 +91,19 @@ class AdminService {
         .toList();
   }
 
-  Future<void> deletePortfolio(
-    String token,
-    int freelancerId,
-    int portfolioId,
-  ) async {
+  Future<void> deletePortfolio(int freelancerId, int portfolioId) async {
     await _api.delete<void>(
       '/admin/freelancers/$freelancerId/portfolio/$portfolioId',
-      token: token,
     );
   }
 
   Future<PageResponse<ProjectAdminListItem>> fetchProjectsPage(
-    String token,
     int page,
     int size,
   ) async {
     final json = await _api.get<Map<String, dynamic>>(
       '/admin/projects?page=$page&size=$size',
-      token: token,
+      decoder: (data) => data,
     );
     return PageResponse<ProjectAdminListItem>.fromJson(
       json!,
@@ -118,13 +112,12 @@ class AdminService {
   }
 
   Future<PageResponse<PortfolioAdminListItem>> fetchPortfoliosPage(
-    String token,
     int page,
     int size,
   ) async {
     final json = await _api.get<Map<String, dynamic>>(
       '/admin/portfolios?page=$page&size=$size',
-      token: token,
+      decoder: (data) => data,
     );
     return PageResponse<PortfolioAdminListItem>.fromJson(
       json!,
@@ -132,13 +125,10 @@ class AdminService {
     );
   }
 
-  Future<FreelancerPortfolio> getPortfolioById(
-    String token,
-    int portfolioId,
-  ) async {
+  Future<FreelancerPortfolio> getPortfolioById(int portfolioId) async {
     final json = await _api.get<Map<String, dynamic>>(
       '/admin/portfolios/$portfolioId',
-      token: token,
+      decoder: (data) => data,
     );
     return FreelancerPortfolio.fromJson(json!);
   }

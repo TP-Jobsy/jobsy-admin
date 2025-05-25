@@ -6,7 +6,9 @@ import 'package:jobsy_admin/pages/portfolio_detail_page.dart';
 import '../model/portfolio_admin_list_item.dart';
 import '../provider/auth_provider.dart';
 import '../service/admin_service.dart';
+import '../service/api_client.dart';
 import '../util/palette.dart';
+import '../util/routes.dart';
 import 'abstract_table_page.dart';
 
 class PortfoliosPage extends StatelessWidget {
@@ -14,14 +16,26 @@ class PortfoliosPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final token = context.watch<AdminAuthProvider>().token;
-    final adminService = AdminService();
+    final auth = context.watch<AdminAuthProvider>();
+
+    final adminService = AdminService(
+      client: ApiClient(
+        baseUrl: Routes.apiBase,
+        getToken: () async {
+          await auth.ensureLoaded();
+          return auth.token;
+        },
+        refreshToken: () async {
+          await auth.refreshTokens();
+        },
+      ),
+    );
 
     return AbstractTablePage<PortfolioAdminListItem>(
       currentSection: AdminSection.portfolio,
-      futureList: token == null
+      futureList: !auth.isLoggedIn
           ? Future.value(<PortfolioAdminListItem>[])
-          : adminService.fetchPortfoliosPage(token, 0, 100).then((resp) => resp.content),
+          : adminService.fetchPortfoliosPage(0, 100).then((resp) => resp.content),
       columns: const [
         DataColumn(label: Text('Id', style: TextStyle(fontWeight: FontWeight.w900, fontFamily: 'Inter', fontSize: 16))),
         DataColumn(label: Text('Название', style: TextStyle(fontWeight: FontWeight.w900, fontFamily: 'Inter', fontSize: 16))),

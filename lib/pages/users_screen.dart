@@ -3,39 +3,69 @@ import 'package:flutter_svg/svg.dart';
 import 'package:provider/provider.dart';
 import 'package:jobsy_admin/pages/sidebar.dart';
 import '../model/admin_user_row.dart';
+import '../model/client/client_profile.dart';
+import '../model/free/freelancer_profile.dart';
 import '../provider/auth_provider.dart';
 import '../service/admin_service.dart';
+import '../service/api_client.dart';
 import '../util/palette.dart';
+import '../util/routes.dart';
 import 'abstract_table_page.dart';
 import 'user_detail_page.dart';
 
 class UsersPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    final token = context.watch<AdminAuthProvider>().token;
-    final adminService = AdminService();
+    final auth = context.watch<AdminAuthProvider>();
+
+    final adminService = AdminService(
+      client: ApiClient(
+        baseUrl: Routes.apiBase,
+        getToken: () async {
+          await auth.ensureLoaded();
+          return auth.token;
+        },
+        refreshToken: () async {
+          await auth.refreshTokens();
+        },
+      ),
+    );
 
     return AbstractTablePage<AdminUserRow>(
       currentSection: AdminSection.users,
-      futureList:
-          token == null
-              ? Future.value(<AdminUserRow>[])
-              : adminService
-                  .getAllClients(token)
-                  .then(
-                    (profiles) =>
-                        profiles.map((p) {
-                          final u = p.user;
-                          return AdminUserRow(
-                            id: u.id.toString(),
-                            firstName: u.firstName,
-                            lastName: u.lastName,
-                            role: u.role,
-                            status: u.isActive ? 'Активен' : 'Заблокирован',
-                            registeredAt: u.createdAt,
-                          );
-                        }).toList(),
-                  ),
+      futureList: Future.wait([
+        adminService.getAllClients(),
+        adminService.getAllFreelancers(),
+      ]).then((results) {
+        final clients = results[0] as List<ClientProfile>;
+        final freelancers = results[1] as List<FreelancerProfile>;
+
+        final clientRows = clients.map((p) {
+          final u = p.user;
+          return AdminUserRow(
+            id: u.id.toString(),
+            firstName: u.firstName,
+            lastName: u.lastName,
+            role: u.role,
+            status: u.isActive ? 'Активен' : 'Заблокирован',
+            registeredAt: u.createdAt,
+          );
+        });
+
+        final freelancerRows = freelancers.map((p) {
+          final u = p.user;
+          return AdminUserRow(
+            id: u.id.toString(),
+            firstName: u.firstName,
+            lastName: u.lastName,
+            role: u.role,
+            status: u.isActive ? 'Активен' : 'Заблокирован',
+            registeredAt: u.createdAt,
+          );
+        });
+
+        return [...clientRows, ...freelancerRows];
+      }),
       columns: const [
         DataColumn(label: Text('Id', style: TextStyle(fontWeight: FontWeight.w900, fontFamily: 'Inter', fontSize: 16))),
         DataColumn(label: Text('Имя', style: TextStyle(fontWeight: FontWeight.w900, fontFamily: 'Inter', fontSize: 16))),
