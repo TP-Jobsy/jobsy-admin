@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/svg.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
 import 'package:jobsy_admin/pages/sidebar.dart';
 import '../model/admin_user_row.dart';
-import '../model/client/client_profile.dart';
-import '../model/free/freelancer_profile.dart';
 import '../provider/auth_provider.dart';
 import '../service/admin_service.dart';
 import '../service/api_client.dart';
@@ -33,39 +31,20 @@ class UsersPage extends StatelessWidget {
 
     return AbstractTablePage<AdminUserRow>(
       currentSection: AdminSection.users,
-      futureList: Future.wait([
-        adminService.getAllClients(),
-        adminService.getAllFreelancers(),
-      ]).then((results) {
-        final clients = results[0] as List<ClientProfile>;
-        final freelancers = results[1] as List<FreelancerProfile>;
-
-        final clientRows = clients.map((p) {
-          final u = p.user;
-          return AdminUserRow(
-            id: u.id.toString(),
-            firstName: u.firstName,
-            lastName: u.lastName,
-            role: u.role,
-            status: u.isActive ? 'Активен' : 'Заблокирован',
-            registeredAt: u.createdAt,
-          );
-        });
-
-        final freelancerRows = freelancers.map((p) {
-          final u = p.user;
-          return AdminUserRow(
-            id: u.id.toString(),
-            firstName: u.firstName,
-            lastName: u.lastName,
-            role: u.role,
-            status: u.isActive ? 'Активен' : 'Заблокирован',
-            registeredAt: u.createdAt,
-          );
-        });
-
-        return [...clientRows, ...freelancerRows];
-      }),
+      futureListBuilder: (search) async {
+        final response = await adminService.searchUsers(
+          firstName: search,
+          lastName: search,
+        );
+        return response.content.map((u) => AdminUserRow(
+          id: u.id,
+          firstName: u.firstName,
+          lastName: u.lastName,
+          role: u.role,
+          status: u.isActive ? 'Активен' : 'Заблокирован',
+          registeredAt: u.createdAt,
+        )).toList();
+      },
       columns: const [
         DataColumn(label: Text('Id', style: TextStyle(fontWeight: FontWeight.w900, fontFamily: 'Inter', fontSize: 16))),
         DataColumn(label: Text('Имя', style: TextStyle(fontWeight: FontWeight.w900, fontFamily: 'Inter', fontSize: 16))),
@@ -77,10 +56,7 @@ class UsersPage extends StatelessWidget {
       ],
       buildRow: (u) {
         final d = u.registeredAt;
-        final date =
-            '${d.day.toString().padLeft(2, '0')}.'
-            '${d.month.toString().padLeft(2, '0')}.'
-            '${d.year}';
+        final date = '${d.day.toString().padLeft(2, '0')}.${d.month.toString().padLeft(2, '0')}.${d.year}';
         return DataRow(
           cells: [
             DataCell(Text(u.id)),
@@ -100,8 +76,7 @@ class UsersPage extends StatelessWidget {
                 onPressed: () {
                   Navigator.of(context).push(
                     MaterialPageRoute(
-                      builder:
-                          (_) => UserDetailPage(userId: u.id, role: u.role),
+                      builder: (_) => UserDetailPage(userId: u.id, role: u.role),
                     ),
                   );
                 },

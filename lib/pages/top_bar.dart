@@ -4,7 +4,9 @@ import '../../util/palette.dart';
 import '../widgets/avatar.dart';
 
 class TopBar extends StatelessWidget {
-  const TopBar({super.key});
+  final void Function(String)? onSearch;
+
+  const TopBar({super.key, this.onSearch});
 
   @override
   Widget build(BuildContext context) {
@@ -16,20 +18,29 @@ class TopBar extends StatelessWidget {
         padding: const EdgeInsets.only(left: 50, right: 24),
         child: Row(
           children: [
-            InkWell(
-              onTap: () {},
-              borderRadius: BorderRadius.circular(8),
-              child: SvgPicture.asset(
-                'assets/icons/filter.svg',
-                width: 24,
-                height: 24,
-                color: Palette.black,
+            Tooltip(
+              message: 'Фильтрация пока не реализована',
+              child: InkWell(
+                onTap: () {
+                  // TODO: позже добавлю
+                },
+                borderRadius: BorderRadius.circular(8),
+                child: SvgPicture.asset(
+                  'assets/icons/Filter.svg',
+                  width: 24,
+                  height: 24,
+                  color: Palette.black,
+                ),
               ),
             ),
             const SizedBox(width: 50),
             Flexible(
               child: ConstrainedBox(
-                constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width - (50 + 24 + 50 + 75 + 24)),
+                constraints: BoxConstraints(
+                  maxWidth:
+                      MediaQuery.of(context).size.width -
+                      (50 + 24 + 50 + 75 + 24),
+                ),
                 child: Container(
                   height: 50,
                   decoration: BoxDecoration(
@@ -40,7 +51,7 @@ class TopBar extends StatelessWidget {
                         color: Palette.black1,
                         blurRadius: 2,
                         offset: Offset(0, 1),
-                      )
+                      ),
                     ],
                   ),
                   padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -53,13 +64,14 @@ class TopBar extends StatelessWidget {
                         color: Palette.grey2,
                       ),
                       const SizedBox(width: 12),
-                      const Expanded(
+                      Expanded(
                         child: TextField(
-                          decoration: InputDecoration(
+                          decoration: const InputDecoration(
                             hintText: 'Поиск',
                             border: InputBorder.none,
                             isDense: true,
                           ),
+                          onSubmitted: onSearch,
                         ),
                       ),
                     ],
@@ -68,10 +80,7 @@ class TopBar extends StatelessWidget {
               ),
             ),
             const Spacer(),
-            const Avatar(
-              size: 75,
-              placeholderAsset: 'assets/icons/avatar.svg',
-            ),
+            const Avatar(size: 75, placeholderAsset: 'assets/icons/avatar.svg'),
             const SizedBox(width: 24),
           ],
         ),

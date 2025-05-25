@@ -33,41 +33,97 @@ class PortfoliosPage extends StatelessWidget {
 
     return AbstractTablePage<PortfolioAdminListItem>(
       currentSection: AdminSection.portfolio,
-      futureList: !auth.isLoggedIn
-          ? Future.value(<PortfolioAdminListItem>[])
-          : adminService.fetchPortfoliosPage(0, 100).then((resp) => resp.content),
+      futureListBuilder: (search) async {
+        if (!auth.isLoggedIn) return [];
+        final response = await adminService.searchPortfolios(
+          term: search,
+          freelancerName: search,
+        );
+        return response.content;
+      },
       columns: const [
-        DataColumn(label: Text('Id', style: TextStyle(fontWeight: FontWeight.w900, fontFamily: 'Inter', fontSize: 16))),
-        DataColumn(label: Text('Название', style: TextStyle(fontWeight: FontWeight.w900, fontFamily: 'Inter', fontSize: 16))),
-        DataColumn(label: Text('Фрилансер', style: TextStyle(fontWeight: FontWeight.w900, fontFamily: 'Inter', fontSize: 16))),
-        DataColumn(label: Text('Дата создания', style: TextStyle(fontWeight: FontWeight.w900, fontFamily: 'Inter', fontSize: 16))),
-        DataColumn(label: Text('Подробнее', style: TextStyle(fontWeight: FontWeight.w900, fontFamily: 'Inter', fontSize: 16))),
+        DataColumn(
+          label: Text(
+            'Id',
+            style: TextStyle(
+              fontWeight: FontWeight.w900,
+              fontFamily: 'Inter',
+              fontSize: 16,
+            ),
+          ),
+        ),
+        DataColumn(
+          label: Text(
+            'Название',
+            style: TextStyle(
+              fontWeight: FontWeight.w900,
+              fontFamily: 'Inter',
+              fontSize: 16,
+            ),
+          ),
+        ),
+        DataColumn(
+          label: Text(
+            'Фрилансер',
+            style: TextStyle(
+              fontWeight: FontWeight.w900,
+              fontFamily: 'Inter',
+              fontSize: 16,
+            ),
+          ),
+        ),
+        DataColumn(
+          label: Text(
+            'Дата создания',
+            style: TextStyle(
+              fontWeight: FontWeight.w900,
+              fontFamily: 'Inter',
+              fontSize: 16,
+            ),
+          ),
+        ),
+        DataColumn(
+          label: Text(
+            'Подробнее',
+            style: TextStyle(
+              fontWeight: FontWeight.w900,
+              fontFamily: 'Inter',
+              fontSize: 16,
+            ),
+          ),
+        ),
       ],
       buildRow: (p) {
-        final date = '${p.createdAt.day.toString().padLeft(2, '0')}.'
+        final date =
+            '${p.createdAt.day.toString().padLeft(2, '0')}.'
             '${p.createdAt.month.toString().padLeft(2, '0')}.'
             '${p.createdAt.year}';
-        return DataRow(cells: [
-          DataCell(Text(p.id.toString())),
-          DataCell(Text(p.title)),
-          DataCell(Text('${p.firstName} ${p.lastName}')),
-          DataCell(Text(date)),
-          DataCell(IconButton(
-            icon: SvgPicture.asset(
-              'assets/icons/ArrowRight.svg',
-              width: 16,
-              height: 16,
-              color: Palette.black,
-            ),
-            onPressed: () {
-              Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (_) => PortfolioDetailPage(portfolioId: p.id),
+
+        return DataRow(
+          cells: [
+            DataCell(Text(p.id.toString())),
+            DataCell(Text(p.title)),
+            DataCell(Text('${p.firstName} ${p.lastName}')),
+            DataCell(Text(date)),
+            DataCell(
+              IconButton(
+                icon: SvgPicture.asset(
+                  'assets/icons/ArrowRight.svg',
+                  width: 16,
+                  height: 16,
+                  color: Palette.black,
                 ),
-              );
-            },
-          )),
-        ]);
+                onPressed: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (_) => PortfolioDetailPage(portfolioId: p.id),
+                    ),
+                  );
+                },
+              ),
+            ),
+          ],
+        );
       },
     );
   }
