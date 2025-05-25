@@ -70,7 +70,6 @@ class _PortfoliosPageState extends State<PortfoliosPage> {
           _loading
               ? const Center(child: CircularProgressIndicator())
               : AbstractTablePage<PortfolioAdminListItem>(
-                currentSection: AdminSection.portfolio,
                 futureList: Future.value(_portfolios),
                 columns: const [
                   DataColumn(label: Text('Id', style: _headerStyle)),
