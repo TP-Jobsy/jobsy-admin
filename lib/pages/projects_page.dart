@@ -111,7 +111,7 @@ class ProjectsPage extends StatelessWidget {
           cells: [
             DataCell(Text(p.id.toString())),
             DataCell(Text(p.title)),
-            DataCell(Text('${p.client.firstName} ${p.client.lastName}')),
+            DataCell(Text('${p.clientFirstName} ${p.clientLastName}')),
             DataCell(Text(p.status)),
             DataCell(Text(date)),
             DataCell(
