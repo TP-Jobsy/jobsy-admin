@@ -16,6 +16,7 @@ class ProjectAdminListItem {
   });
 
   factory ProjectAdminListItem.fromJson(Map<String, dynamic> json) {
+    print('ProjectAdminListItem JSON: $json');
     return ProjectAdminListItem(
       id: (json['id'] as num).toInt(),
       title: json['title'] as String,

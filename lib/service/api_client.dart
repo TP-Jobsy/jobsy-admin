@@ -131,6 +131,8 @@ class ApiClient {
     if (res.statusCode != expectCode) {
       late String error;
       try {
+        final body = utf8.decode(res.bodyBytes);
+        print('Response body from $expectCode at ${res.request?.url}: $body');
         final jsonBody = jsonDecode(body);
         if (jsonBody is Map) {
           error =
