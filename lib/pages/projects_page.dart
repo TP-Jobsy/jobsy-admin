@@ -10,15 +10,27 @@ import '../service/api_client.dart';
 import '../util/palette.dart';
 import '../util/routes.dart';
 import 'abstract_table_page.dart';
+import 'admin_layout.dart';
 
-class ProjectsPage extends StatelessWidget {
+class ProjectsPage extends StatefulWidget {
   const ProjectsPage({super.key});
 
-  @override
-  Widget build(BuildContext context) {
-    final auth = context.watch<AdminAuthProvider>();
 
-    final adminService = AdminService(
+  @override
+  State<ProjectsPage> createState() => _ProjectsPageState();
+}
+
+class _ProjectsPageState extends State<ProjectsPage> {
+  List<ProjectAdminListItem> _projects = [];
+  String? _searchTerm;
+  bool _loading = true;
+  late final AdminService adminService;
+
+  @override
+  void initState() {
+    super.initState();
+    final auth = context.read<AdminAuthProvider>();
+    adminService = AdminService(
       client: ApiClient(
         baseUrl: Routes.apiBase,
         getToken: () async {
@@ -30,110 +42,82 @@ class ProjectsPage extends StatelessWidget {
         },
       ),
     );
+    _loadProjects();
+  }
 
-    return AbstractTablePage<ProjectAdminListItem>(
+  void _loadProjects() async {
+    setState(() => _loading = true);
+    final response = await adminService.searchProjects(term: _searchTerm);
+    setState(() {
+      _projects = response.content;
+      _loading = false;
+    });
+  }
+
+  void _onSearch(String query) {
+    _searchTerm = query.trim().isEmpty ? null : query;
+    _loadProjects();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AdminLayout(
       currentSection: AdminSection.projects,
-      futureListBuilder: (search) async {
-        if (!auth.isLoggedIn) return [];
-
-        final response = await adminService.searchProjects(term: search);
-        return response.content;
-      },
-      columns: const [
-        DataColumn(
-          label: Text(
-            'Id',
-            style: TextStyle(
-              fontWeight: FontWeight.w900,
-              fontFamily: 'Inter',
-              fontSize: 16,
-            ),
-          ),
-        ),
-        DataColumn(
-          label: Text(
-            'Название',
-            style: TextStyle(
-              fontWeight: FontWeight.w900,
-              fontFamily: 'Inter',
-              fontSize: 16,
-            ),
-          ),
-        ),
-        DataColumn(
-          label: Text(
-            'Клиент',
-            style: TextStyle(
-              fontWeight: FontWeight.w900,
-              fontFamily: 'Inter',
-              fontSize: 16,
-            ),
-          ),
-        ),
-        DataColumn(
-          label: Text(
-            'Статус',
-            style: TextStyle(
-              fontWeight: FontWeight.w900,
-              fontFamily: 'Inter',
-              fontSize: 16,
-            ),
-          ),
-        ),
-        DataColumn(
-          label: Text(
-            'Дата создания',
-            style: TextStyle(
-              fontWeight: FontWeight.w900,
-              fontFamily: 'Inter',
-              fontSize: 16,
-            ),
-          ),
-        ),
-        DataColumn(
-          label: Text(
-            'Подробнее',
-            style: TextStyle(
-              fontWeight: FontWeight.w900,
-              fontFamily: 'Inter',
-              fontSize: 16,
-            ),
-          ),
-        ),
-      ],
-      buildRow: (p) {
-        final date =
-            '${p.createdAt.day.toString().padLeft(2, '0')}.'
-            '${p.createdAt.month.toString().padLeft(2, '0')}.'
-            '${p.createdAt.year}';
-
-        return DataRow(
-          cells: [
-            DataCell(Text(p.id.toString())),
-            DataCell(Text(p.title)),
-            DataCell(Text('${p.clientFirstName} ${p.clientLastName}')),
-            DataCell(Text(p.status)),
-            DataCell(Text(date)),
-            DataCell(
-              IconButton(
-                icon: SvgPicture.asset(
-                  'assets/icons/ArrowRight.svg',
-                  width: 16,
-                  height: 16,
-                  color: Palette.black,
-                ),
-                onPressed: () {
-                  Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (_) => ProjectDetailPage(projectId: p.id),
-                    ),
+      onSearch: _onSearch,
+      child:
+          _loading
+              ? const Center(child: CircularProgressIndicator())
+              : AbstractTablePage<ProjectAdminListItem>(
+                currentSection: AdminSection.projects,
+                futureList: Future.value(_projects),
+                columns: const [
+                  DataColumn(label: Text('Id', style: _headerStyle)),
+                  DataColumn(label: Text('Название', style: _headerStyle)),
+                  DataColumn(label: Text('Клиент', style: _headerStyle)),
+                  DataColumn(label: Text('Статус', style: _headerStyle)),
+                  DataColumn(label: Text('Дата создания', style: _headerStyle)),
+                  DataColumn(label: Text('Подробнее', style: _headerStyle)),
+                ],
+                buildRow: (p) {
+                  final date =
+                      '${p.createdAt.day.toString().padLeft(2, '0')}.${p.createdAt.month.toString().padLeft(2, '0')}.${p.createdAt.year}';
+                  return DataRow(
+                    cells: [
+                      DataCell(Text(p.id.toString())),
+                      DataCell(Text(p.title)),
+                      DataCell(
+                        Text('${p.clientFirstName} ${p.clientLastName}'),
+                      ),
+                      DataCell(Text(p.status)),
+                      DataCell(Text(date)),
+                      DataCell(
+                        IconButton(
+                          icon: SvgPicture.asset(
+                            'assets/icons/ArrowRight.svg',
+                            width: 16,
+                            height: 16,
+                            color: Palette.black,
+                          ),
+                          onPressed: () {
+                            Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder:
+                                    (_) => ProjectDetailPage(projectId: p.id),
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                    ],
                   );
                 },
               ),
-            ),
-          ],
-        );
-      },
     );
   }
 }
+
+const TextStyle _headerStyle = TextStyle(
+  fontWeight: FontWeight.w900,
+  fontFamily: 'Inter',
+  fontSize: 16,
+);
