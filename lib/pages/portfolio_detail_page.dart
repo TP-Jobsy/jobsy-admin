@@ -3,7 +3,9 @@ import 'package:provider/provider.dart';
 import '../model/portfolio/portfolio.dart';
 import '../provider/auth_provider.dart';
 import '../service/admin_service.dart';
+import '../service/api_client.dart';
 import '../util/palette.dart';
+import '../util/routes.dart';
 import 'sidebar.dart';
 
 class PortfolioDetailPage extends StatelessWidget {
@@ -15,7 +17,20 @@ class PortfolioDetailPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final token = context.read<AdminAuthProvider>().token!;
+    final auth = context.read<AdminAuthProvider>();
+
+    final adminService = AdminService(
+      client: ApiClient(
+        baseUrl: Routes.apiBase,
+        getToken: () async {
+          await auth.ensureLoaded();
+          return auth.token;
+        },
+        refreshToken: () async {
+          await auth.refreshTokens();
+        },
+      ),
+    );
 
     return Scaffold(
       drawer: const Sidebar(),
@@ -24,7 +39,7 @@ class PortfolioDetailPage extends StatelessWidget {
         backgroundColor: Palette.primary,
       ),
       body: FutureBuilder<FreelancerPortfolio>(
-        future: AdminService().getPortfolioById(token, portfolioId),
+        future: adminService.getPortfolioById(portfolioId),
         builder: (ctx, snap) {
           if (snap.connectionState != ConnectionState.done) {
             return const Center(child: CircularProgressIndicator());

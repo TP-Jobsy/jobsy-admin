@@ -5,7 +5,9 @@ import '../model/client/client_profile.dart';
 import '../model/free/freelancer_profile.dart';
 import '../provider/auth_provider.dart';
 import '../service/admin_service.dart';
+import '../service/api_client.dart';
 import '../util/palette.dart';
+import '../util/routes.dart';
 import 'admin_layout.dart';
 import 'client_detail_content.dart';
 import 'freelancer_detail_content.dart';
@@ -35,25 +37,39 @@ class _UserDetailPageState extends State<UserDetailPage> {
   @override
   void initState() {
     super.initState();
-    final token = context.read<AdminAuthProvider>().token!;
-    _adminService = AdminService();
 
-    if (isClient) {
-      _adminService
-          .getClientById(token, int.parse(widget.userId))
-          .then((p) => setState(() => _clientProfile = p))
-          .catchError((e) {
-        // TODO: показать ErrorSnackbar
-      })
-          .whenComplete(() => setState(() => _loading = false));
-    } else {
-      _adminService
-          .getFreelancerById(token, int.parse(widget.userId))
-          .then((p) => setState(() => _freelancerProfile = p))
-          .catchError((e) {
-        // TODO: показать ErrorSnackbar
-      })
-          .whenComplete(() => setState(() => _loading = false));
+    final auth = context.read<AdminAuthProvider>();
+
+    _adminService = AdminService(
+      client: ApiClient(
+        baseUrl: Routes.apiBase,
+        getToken: () async {
+          await auth.ensureLoaded();
+          return auth.token;
+        },
+        refreshToken: () async {
+          await auth.refreshTokens();
+        },
+      ),
+    );
+
+    _loadUser();
+  }
+
+  Future<void> _loadUser() async {
+    try {
+      if (isClient) {
+        final client = await _adminService.getClientById(int.parse(widget.userId));
+        setState(() => _clientProfile = client);
+      } else {
+        final freelancer = await _adminService.getFreelancerById(int.parse(widget.userId));
+        setState(() => _freelancerProfile = freelancer);
+      }
+    } catch (e) {
+      // TODO: добавить ErrorSnackbar
+      debugPrint('Ошибка при загрузке профиля: $e');
+    } finally {
+      setState(() => _loading = false);
     }
   }
 

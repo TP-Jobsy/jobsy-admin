@@ -6,7 +6,9 @@ import 'package:jobsy_admin/pages/sidebar.dart';
 import '../model/project_admin_list_item.dart';
 import '../provider/auth_provider.dart';
 import '../service/admin_service.dart';
+import '../service/api_client.dart';
 import '../util/palette.dart';
+import '../util/routes.dart';
 import 'abstract_table_page.dart';
 
 class ProjectsPage extends StatelessWidget {
@@ -14,17 +16,29 @@ class ProjectsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final token = context.watch<AdminAuthProvider>().token;
-    final adminService = AdminService();
+    final auth = context.watch<AdminAuthProvider>();
+
+    final adminService = AdminService(
+      client: ApiClient(
+        baseUrl: Routes.apiBase,
+        getToken: () async {
+          await auth.ensureLoaded();
+          return auth.token;
+        },
+        refreshToken: () async {
+          await auth.refreshTokens();
+        },
+      ),
+    );
+
 
     return AbstractTablePage<ProjectAdminListItem>(
       currentSection: AdminSection.projects,
-      futureList:
-          token == null
-              ? Future.value(<ProjectAdminListItem>[])
-              : adminService
-                  .fetchProjectsPage(token, 0, 100)
-                  .then((resp) => resp.content),
+      futureList: auth.token == null
+          ? Future.value(<ProjectAdminListItem>[])
+          : adminService
+          .fetchProjectsPage(0, 100)
+          .then((resp) => resp.content),
       columns: const [
         DataColumn(label: Text('Id', style: TextStyle(fontWeight: FontWeight.w900, fontFamily: 'Inter', fontSize: 16))),
         DataColumn(label: Text('Название', style: TextStyle(fontWeight: FontWeight.w900, fontFamily: 'Inter', fontSize: 16))),

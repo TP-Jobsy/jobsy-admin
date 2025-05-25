@@ -4,6 +4,8 @@ import 'package:jobsy_admin/pages/sidebar.dart';
 import '../model/project/project.dart';
 import '../provider/auth_provider.dart';
 import '../service/admin_service.dart';
+import '../service/api_client.dart';
+import '../util/routes.dart';
 import 'admin_layout.dart';
 import '../../util/palette.dart';
 
@@ -19,23 +21,41 @@ class ProjectDetailPage extends StatefulWidget {
 class _ProjectDetailPageState extends State<ProjectDetailPage> {
   Project? _project;
   bool _loading = true;
+  late AdminService _adminService;
 
   @override
   void initState() {
     super.initState();
-    _loadProject();
+    _initServiceAndLoad();
+  }
+
+  Future<void> _initServiceAndLoad() async {
+    final auth = context.read<AdminAuthProvider>();
+    _adminService = AdminService(
+      client: ApiClient(
+        baseUrl: Routes.apiBase,
+        getToken: () async {
+          await auth.ensureLoaded();
+          return auth.token;
+        },
+        refreshToken: () async {
+          await auth.refreshTokens();
+        },
+      ),
+    );
+    await _loadProject();
   }
 
   Future<void> _loadProject() async {
-    final token = context.read<AdminAuthProvider>().token!;
     try {
-      final project = await AdminService().getProjectById(token, widget.projectId);
+      final project = await _adminService.getProjectById(widget.projectId);
       setState(() {
         _project = project;
         _loading = false;
       });
     } catch (e) {
       setState(() => _loading = false);
+      // TODO: Добавьте отображение ошибки
     }
   }
 
