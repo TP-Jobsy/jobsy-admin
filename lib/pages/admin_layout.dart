@@ -5,10 +5,13 @@ import 'top_bar.dart';
 class AdminLayout extends StatelessWidget {
   final AdminSection currentSection;
   final Widget child;
+  final void Function(String)? onSearch;
+
   const AdminLayout({
     super.key,
     required this.currentSection,
     required this.child,
+    this.onSearch,
   });
 
   @override
@@ -22,6 +25,7 @@ class AdminLayout extends StatelessWidget {
               children: [
                 const TopBar(),
                 const Divider(height:0, thickness:0),
+                TopBar(onSearch: onSearch),
                 Expanded(child: child),
               ],
             ),
