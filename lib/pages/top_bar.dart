@@ -58,7 +58,7 @@ class TopBar extends StatelessWidget {
                   child: Row(
                     children: [
                       SvgPicture.asset(
-                        'assets/icons/search.svg',
+                        'assets/icons/Search.svg',
                         width: 20,
                         height: 20,
                         color: Palette.grey2,

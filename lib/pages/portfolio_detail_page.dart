@@ -6,20 +6,32 @@ import '../service/admin_service.dart';
 import '../service/api_client.dart';
 import '../util/palette.dart';
 import '../util/routes.dart';
+import 'admin_layout.dart';
 import 'sidebar.dart';
 
-class PortfolioDetailPage extends StatelessWidget {
+class PortfolioDetailPage extends StatefulWidget {
   final int portfolioId;
-  const PortfolioDetailPage({
-    Key? key,
-    required this.portfolioId,
-  }) : super(key: key);
+
+  const PortfolioDetailPage({Key? key, required this.portfolioId}) : super(key: key);
 
   @override
-  Widget build(BuildContext context) {
-    final auth = context.read<AdminAuthProvider>();
+  State<PortfolioDetailPage> createState() => _PortfolioDetailPageState();
+}
 
-    final adminService = AdminService(
+class _PortfolioDetailPageState extends State<PortfolioDetailPage> {
+  FreelancerPortfolio? _portfolio;
+  bool _loading = true;
+  late AdminService _adminService;
+
+  @override
+  void initState() {
+    super.initState();
+    _initServiceAndLoad();
+  }
+
+  Future<void> _initServiceAndLoad() async {
+    final auth = context.read<AdminAuthProvider>();
+    _adminService = AdminService(
       client: ApiClient(
         baseUrl: Routes.apiBase,
         getToken: () async {
@@ -32,40 +44,73 @@ class PortfolioDetailPage extends StatelessWidget {
       ),
     );
 
-    return Scaffold(
-      drawer: const Sidebar(),
-      appBar: AppBar(
-        title: const Text('Детали портфолио'),
-        backgroundColor: Palette.primary,
-      ),
-      body: FutureBuilder<FreelancerPortfolio>(
-        future: adminService.getPortfolioById(portfolioId),
-        builder: (ctx, snap) {
-          if (snap.connectionState != ConnectionState.done) {
-            return const Center(child: CircularProgressIndicator());
-          }
-          if (snap.hasError || snap.data == null) {
-            return const Center(child: Text('Ошибка при загрузке данных'));
-          }
-          final dto = snap.data!;
-          final skillsStr = dto.skills.isNotEmpty
-              ? dto.skills.map((s) => s.name).join(', ')
-              : '—';
-          return Padding(
-            padding: const EdgeInsets.fromLTRB(60, 40, 60, 20),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _buildField('Название проекта:', dto.title),
-                _buildField('Должность:', dto.roleInProject ?? '—'),
-                _buildField('Описание:', dto.description),
-                _buildField('Ссылка:', dto.projectLink),
-                _buildField('Навыки:', skillsStr),
-                _buildField('Дата создания:', _formatDate(dto.createdAt)),
-              ],
-            ),
-          );
-        },
+    try {
+      final portfolio = await _adminService.getPortfolioById(widget.portfolioId);
+      setState(() {
+        _portfolio = portfolio;
+        _loading = false;
+      });
+    } catch (e) {
+      setState(() => _loading = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AdminLayout(
+      currentSection: AdminSection.portfolio,
+      child: _loading
+          ? const Center(child: CircularProgressIndicator())
+          : _portfolio == null
+          ? const Center(child: Text('Портфолио не найдено'))
+          : _buildContent(_portfolio!),
+    );
+  }
+
+  Widget _buildContent(FreelancerPortfolio dto) {
+    final skillsStr = dto.skills.isNotEmpty
+        ? dto.skills.map((s) => s.name).join(', ')
+        : '—';
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(60, 40, 60, 20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              InkWell(
+                onTap: () => Navigator.of(context).pop(),
+                child: const Icon(Icons.arrow_back_ios, size: 20),
+              ),
+              const SizedBox(width: 16),
+              const Text(
+                'Детали портфолио',
+                style: TextStyle(fontSize: 24, fontWeight: FontWeight.w600),
+              ),
+              const Spacer(),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade100,
+                  borderRadius: BorderRadius.circular(15),
+                  border: Border.all(color: Colors.grey.shade300),
+                ),
+                child: Text(
+                  'ID: ${dto.id}',
+                  style: const TextStyle(fontSize: 14),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 32),
+          _buildField('Название проекта:', dto.title),
+          _buildField('Должность:', dto.roleInProject ?? '—'),
+          _buildField('Описание:', dto.description),
+          _buildField('Ссылка:', dto.projectLink),
+          _buildField('Навыки:', skillsStr),
+          _buildField('Дата создания:', _formatDate(dto.createdAt)),
+        ],
       ),
     );
   }
@@ -76,9 +121,29 @@ class PortfolioDetailPage extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          SizedBox(width: 180, child: Text(label, style: const TextStyle(fontSize: 16))),
+          SizedBox(
+            width: 180,
+            child: Text(label, style: const TextStyle(fontSize: 16)),
+          ),
           const SizedBox(width: 16),
-          Expanded(child: Text(value)),
+          Expanded(
+            child: TextField(
+              readOnly: true,
+              controller: TextEditingController(text: value),
+              decoration: InputDecoration(
+                isDense: true,
+                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(24),
+                  borderSide: BorderSide(color: Palette.grey3),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(24),
+                  borderSide: BorderSide(color: Palette.grey3),
+                ),
+              ),
+            ),
+          ),
         ],
       ),
     );
