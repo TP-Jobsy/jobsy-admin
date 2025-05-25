@@ -83,7 +83,6 @@ class _UsersPageState extends State<UsersPage> {
           _loading
               ? const Center(child: CircularProgressIndicator())
               : AbstractTablePage<AdminUserRow>(
-                currentSection: AdminSection.users,
                 futureList: Future.value(_users),
                 columns: const [
                   DataColumn(

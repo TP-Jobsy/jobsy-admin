@@ -68,7 +68,6 @@ class _ProjectsPageState extends State<ProjectsPage> {
           _loading
               ? const Center(child: CircularProgressIndicator())
               : AbstractTablePage<ProjectAdminListItem>(
-                currentSection: AdminSection.projects,
                 futureList: Future.value(_projects),
                 columns: const [
                   DataColumn(label: Text('Id', style: _headerStyle)),

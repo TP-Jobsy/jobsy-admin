@@ -23,7 +23,6 @@ class AdminLayout extends StatelessWidget {
           Expanded(
             child: Column(
               children: [
-                const TopBar(),
                 const Divider(height:0, thickness:0),
                 TopBar(onSearch: onSearch),
                 Expanded(child: child),
