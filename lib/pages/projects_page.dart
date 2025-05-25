@@ -31,27 +31,82 @@ class ProjectsPage extends StatelessWidget {
       ),
     );
 
-
     return AbstractTablePage<ProjectAdminListItem>(
       currentSection: AdminSection.projects,
-      futureList: auth.token == null
-          ? Future.value(<ProjectAdminListItem>[])
-          : adminService
-          .fetchProjectsPage(0, 100)
-          .then((resp) => resp.content),
+      futureListBuilder: (search) async {
+        if (!auth.isLoggedIn) return [];
+
+        final response = await adminService.searchProjects(term: search);
+        return response.content;
+      },
       columns: const [
-        DataColumn(label: Text('Id', style: TextStyle(fontWeight: FontWeight.w900, fontFamily: 'Inter', fontSize: 16))),
-        DataColumn(label: Text('Название', style: TextStyle(fontWeight: FontWeight.w900, fontFamily: 'Inter', fontSize: 16))),
-        DataColumn(label: Text('Клиент', style: TextStyle(fontWeight: FontWeight.w900, fontFamily: 'Inter', fontSize: 16))),
-        DataColumn(label: Text('Статус', style: TextStyle(fontWeight: FontWeight.w900, fontFamily: 'Inter', fontSize: 16))),
-        DataColumn(label: Text('Дата создания', style: TextStyle(fontWeight: FontWeight.w900, fontFamily: 'Inter', fontSize: 16))),
-        DataColumn(label: Text('Подробнее', style: TextStyle(fontWeight: FontWeight.w900, fontFamily: 'Inter', fontSize: 16))),
+        DataColumn(
+          label: Text(
+            'Id',
+            style: TextStyle(
+              fontWeight: FontWeight.w900,
+              fontFamily: 'Inter',
+              fontSize: 16,
+            ),
+          ),
+        ),
+        DataColumn(
+          label: Text(
+            'Название',
+            style: TextStyle(
+              fontWeight: FontWeight.w900,
+              fontFamily: 'Inter',
+              fontSize: 16,
+            ),
+          ),
+        ),
+        DataColumn(
+          label: Text(
+            'Клиент',
+            style: TextStyle(
+              fontWeight: FontWeight.w900,
+              fontFamily: 'Inter',
+              fontSize: 16,
+            ),
+          ),
+        ),
+        DataColumn(
+          label: Text(
+            'Статус',
+            style: TextStyle(
+              fontWeight: FontWeight.w900,
+              fontFamily: 'Inter',
+              fontSize: 16,
+            ),
+          ),
+        ),
+        DataColumn(
+          label: Text(
+            'Дата создания',
+            style: TextStyle(
+              fontWeight: FontWeight.w900,
+              fontFamily: 'Inter',
+              fontSize: 16,
+            ),
+          ),
+        ),
+        DataColumn(
+          label: Text(
+            'Подробнее',
+            style: TextStyle(
+              fontWeight: FontWeight.w900,
+              fontFamily: 'Inter',
+              fontSize: 16,
+            ),
+          ),
+        ),
       ],
       buildRow: (p) {
         final date =
             '${p.createdAt.day.toString().padLeft(2, '0')}.'
             '${p.createdAt.month.toString().padLeft(2, '0')}.'
             '${p.createdAt.year}';
+
         return DataRow(
           cells: [
             DataCell(Text(p.id.toString())),
@@ -67,7 +122,7 @@ class ProjectsPage extends StatelessWidget {
                   height: 16,
                   color: Palette.black,
                 ),
-                onPressed: () async {
+                onPressed: () {
                   Navigator.of(context).push(
                     MaterialPageRoute(
                       builder: (_) => ProjectDetailPage(projectId: p.id),
