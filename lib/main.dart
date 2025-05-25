@@ -15,8 +15,8 @@ void main() async {
   await authProvider.ensureLoaded();
 
   runApp(
-    ChangeNotifierProvider(
-      create: (_) => AdminAuthProvider(baseUrl: Routes.apiBase),
+    ChangeNotifierProvider.value(
+      value: authProvider,
       child: const MyApp(),
     ),
   );
