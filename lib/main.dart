@@ -1,7 +1,25 @@
 import 'package:flutter/material.dart';
+import 'package:jobsy_admin/pages/login_page.dart';
+import 'package:jobsy_admin/pages/portfolio_page.dart';
+import 'package:jobsy_admin/pages/projects_page.dart';
+import 'package:jobsy_admin/pages/user_detail_page.dart';
+import 'package:jobsy_admin/pages/users_screen.dart';
+import 'package:jobsy_admin/provider/auth_provider.dart';
+import 'package:jobsy_admin/util/routes.dart';
+import 'package:provider/provider.dart';
 
-void main() {
-  runApp(const MyApp());
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  final authProvider = AdminAuthProvider(baseUrl: Routes.apiBase);
+  await authProvider.ensureLoaded();
+
+  runApp(
+    ChangeNotifierProvider.value(
+      value: authProvider,
+      child: const MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
@@ -10,27 +28,49 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
+    final auth = context.watch<AdminAuthProvider>();
+    if (!auth.isLoaded) {
+      return const MaterialApp(
+        home: Scaffold(
+          body: Center(child: CircularProgressIndicator()),
+        ),
+      );
+    }
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: 'Jobsy Admin',
       theme: ThemeData(
-        // This is the theme of your application.
-        //
-        // TRY THIS: Try running your application with "flutter run". You'll see
-        // the application has a purple toolbar. Then, without quitting the app,
-        // try changing the seedColor in the colorScheme below to Colors.green
-        // and then invoke "hot reload" (save your changes or press the "hot
-        // reload" button in a Flutter-supported IDE, or press "r" if you used
-        // the command line to start the app).
-        //
-        // Notice that the counter didn't reset back to zero; the application
-        // state is not lost during the reload. To reset the state, use hot
-        // restart instead.
-        //
-        // This works for code too, not just values: Most code changes can be
-        // tested with just a hot reload.
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+        scaffoldBackgroundColor: Colors.white,
+        colorScheme: const ColorScheme.light(
+          background: Colors.white,
+          primary: Colors.black,
+        ),
+        useMaterial3: true,
       ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+      initialRoute: auth.isLoggedIn ? Routes.users : Routes.login,
+      routes: {
+        Routes.login: (_) => AdminLoginPage(),
+        Routes.users: (_) => UsersPage(),
+        Routes.projects: (_) => ProjectsPage(),
+        Routes.portfolio: (_) => PortfoliosPage(),
+      },
+      onGenerateRoute: (settings) {
+        switch (settings.name) {
+          case Routes.userDetail:
+            final args = settings.arguments as Map<String, String>;
+            return MaterialPageRoute(
+              builder: (_) => UserDetailPage(
+                userId: args['id']!,
+                role:   args['role']!,
+              ),
+            );
+
+        }
+        return MaterialPageRoute(
+          builder: (_) => const Scaffold(
+            body: Center(child: Text('Страница не найдена')),
+          ),
+        );
+      },
     );
   }
 }

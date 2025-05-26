@@ -34,6 +34,12 @@ dependencies:
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.8
+  flutter_svg: ^2.0.7
+  cached_network_image: ^3.2.3
+  shared_preferences: ^2.5.3
+  http: ^1.3.0
+  provider: ^6.1.4
+  flutter_secure_storage: ^8.0.0
 
 dev_dependencies:
   flutter_test:
@@ -51,11 +57,61 @@ dev_dependencies:
 
 # The following section is specific to Flutter packages.
 flutter:
-
-  # The following line ensures that the Material Icons font is
-  # included with your application, so that you can use the icons in
-  # the material Icons class.
   uses-material-design: true
+  assets:
+    - assets/app_icon.png
+    - assets/logo.svg
+    - assets/projects.svg
+    - assets/archive.svg
+    - assets/DrawKit Vector Illustration Team Work (3).svg
+    - assets/onboarding1.svg
+    - assets/onboarding2.svg
+    - assets/onboarding3.svg
+    - assets/onboarding4.svg
+    - assets/icons/Home.svg
+    - assets/icons/Search.svg
+    - assets/icons/EyeInvisible.svg
+    - assets/icons/EyeVisible.svg
+    - assets/icons/Add.svg
+    - assets/icons/Close.svg
+    - assets/icons/Check.svg
+    - assets/icons/ArrowLeft.svg
+    - assets/icons/ArrowRight.svg
+    - assets/icons/ArrowUp.svg
+    - assets/icons/ArrowDown.svg
+    - assets/icons/Profile.svg
+    - assets/icons/Heart Filled.svg
+    - assets/icons/Heart Outlined.svg
+    - assets/icons/Trailing.svg
+    - assets/icons/user.svg
+    - assets/icons/Warning.svg
+    - assets/icons/Inbox.svg
+    - assets/icons/Info.svg
+    - assets/icons/Success.svg
+    - assets/icons/Delete.svg
+    - assets/icons/solar_phone-bold.svg
+    - assets/icons/calendar.svg
+    - assets/icons/akar-icons_link-out.svg
+    - assets/icons/checkTrue.svg
+    - assets/icons/checkFalse.svg
+    - assets/icons/avatar.svg
+    - assets/unlog.svg
+    - assets/icons/RadioButton.svg
+    - assets/icons/RadioButton2.svg
+    - assets/DrawKit9.svg
+    - assets/delete_screen_confirmation.svg
+    - assets/icons/user.svg
+    - assets/icons/projects.svg
+    - assets/icons/portfolio.svg
+    - assets/icons/logout.svg
+    - assets/icons/menu.svg
+    - assets/icons/Filter.svg
+    - assets/icons/company.svg
+    - assets/icons/location.svg
+    - assets/icons/star.svg
+    - assets/icons/Edit.svg
+    - assets/icons/StarFilled.svg
+    - assets/icons/StarOutlined.svg
 
   # To add assets to your application, add an assets section, like this:
   # assets:

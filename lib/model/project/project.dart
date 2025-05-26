@@ -1,0 +1,169 @@
+import 'dart:convert';
+import '../category/category.dart';
+import '../client/client_profile.dart';
+import '../enum/complexity.dart';
+import '../enum/payment-type.dart';
+import '../enum/project-application-status.dart';
+import '../enum/project-duration.dart';
+import '../enum/project-status.dart';
+import '../free/freelancer_profile.dart';
+import '../skill/skill.dart';
+import '../specialization/specialization.dart';
+
+class Project {
+  final int id;
+  final String title;
+  final String description;
+  final Complexity complexity;
+  final PaymentType paymentType;
+  final double fixedPrice;
+  final ProjectDuration duration;
+  final ProjectStatus status;
+  final DateTime createdAt;
+  final DateTime updatedAt;
+  final Category category;
+  final Specialization specialization;
+  final List<Skill> skills;
+  final ClientProfile client;
+  final FreelancerProfile? assignedFreelancer;
+  final bool clientCompleted;
+  final bool freelancerCompleted;
+
+  final ProjectApplicationStatus? applicationStatus;
+
+  Project({
+    required this.id,
+    required this.title,
+    required this.description,
+    required this.complexity,
+    required this.paymentType,
+    required this.fixedPrice,
+    required this.duration,
+    required this.status,
+    required this.createdAt,
+    required this.updatedAt,
+    required this.category,
+    required this.specialization,
+    required this.skills,
+    required this.client,
+    this.assignedFreelancer,
+    required this.clientCompleted,
+    required this.freelancerCompleted,
+    this.applicationStatus,
+  });
+
+  factory Project.fromJson(Map<String, dynamic> json) {
+    T enumFromString<T extends Enum>(
+        Iterable<T> values,
+        String? value, {
+          required T fallback,
+        }) {
+      if (value == null) return fallback;
+      return values.firstWhere(
+            (e) => e.name == value,
+        orElse: () => fallback,
+      );
+    }
+
+    ProjectApplicationStatus? appStatus;
+    final rawApp = json['applicationStatus'] as String?;
+    if (rawApp != null) {
+      appStatus = ProjectApplicationStatus.values.firstWhere(
+            (e) => e.name == rawApp,
+        orElse: () => ProjectApplicationStatus.PENDING,
+      );
+    }
+
+    return Project(
+      id: json['id'] as int,
+      clientCompleted: json['clientCompleted'] as bool? ?? false,
+      freelancerCompleted: json['freelancerCompleted'] as bool? ?? false,
+      title: json['title'] as String,
+      description: (json['description'] as String?) ?? '',
+      complexity: enumFromString<Complexity>(
+        Complexity.values,
+        json['complexity'] as String?,
+        fallback: Complexity.EASY,
+      ),
+      paymentType: enumFromString<PaymentType>(
+        PaymentType.values,
+        json['paymentType'] as String?,
+        fallback: PaymentType.FIXED,
+      ),
+      fixedPrice: (json['fixedPrice'] as num?)?.toDouble() ?? 0.0,
+      duration: enumFromString<ProjectDuration>(
+        ProjectDuration.values,
+        json['duration'] as String?,
+        fallback: ProjectDuration.LESS_THAN_1_MONTH,
+      ),
+      status: enumFromString<ProjectStatus>(
+        ProjectStatus.values,
+        json['status'] as String?,
+        fallback: ProjectStatus.DRAFT,
+      ),
+      createdAt: json['createdAt'] != null
+          ? DateTime.parse(json['createdAt'] as String)
+          : DateTime.now(),
+      updatedAt: json['updatedAt'] != null
+          ? DateTime.parse(json['updatedAt'] as String)
+          : DateTime.now(),
+      category: Category.fromJson(json['category'] as Map<String, dynamic>),
+      specialization:
+      Specialization.fromJson(json['specialization'] as Map<String, dynamic>),
+      skills: (json['skills'] as List<dynamic>?)
+          ?.map((e) => Skill.fromJson(e as Map<String, dynamic>))
+          .toList() ??
+          [],
+      client: ClientProfile.fromJson(json['client'] as Map<String, dynamic>),
+      assignedFreelancer: json['assignedFreelancer'] != null
+          ? FreelancerProfile.fromJson(
+          json['assignedFreelancer'] as Map<String, dynamic>)
+          : null,
+      applicationStatus: appStatus,
+    );
+  }
+
+  static Project fromJsonString(String jsonString) =>
+      Project.fromJson(jsonDecode(jsonString) as Map<String, dynamic>);
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'title': title,
+      'description': description,
+      'complexity': complexity.name,
+      'paymentType': paymentType.name,
+      'fixedPrice': fixedPrice,
+      'duration': duration.name,
+      'status': status.name,
+      'createdAt': createdAt.toIso8601String(),
+      'updatedAt': updatedAt.toIso8601String(),
+      'category': category.toJson(),
+      'specialization': specialization.toJson(),
+      'skills': skills.map((s) => s.toJson()).toList(),
+      'client': client.toJson(),
+      'assignedFreelancer': assignedFreelancer?.toJson(),
+      'clientCompleted': clientCompleted,
+      'freelancerCompleted': freelancerCompleted,
+      if (applicationStatus != null)
+        'applicationStatus': applicationStatus!.name,
+    };
+  }
+
+  String get statusText {
+    switch (applicationStatus) {
+      case ProjectApplicationStatus.PENDING:
+        return 'Рассматривается';
+      case ProjectApplicationStatus.APPROVED:
+        return 'Принято';
+      case ProjectApplicationStatus.DECLINED:
+        return 'Отклонено';
+      default:
+        return '';
+    }
+  }
+
+  bool get isProcessed =>
+      applicationStatus == ProjectApplicationStatus.APPROVED ||
+          applicationStatus == ProjectApplicationStatus.DECLINED;
+}
