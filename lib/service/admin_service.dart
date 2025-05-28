@@ -235,4 +235,15 @@ class AdminService {
   Future<void> deactivateClient(int userId) async {
     await _api.put<void>('/admin/clients/$userId/deactivate', expectCode: 200);
   }
+
+  Future<List<Project>> getFreelancerProjects(int freelancerId) async {
+    final json = await _api.get<List<dynamic>>(
+      '/admin/freelancers/$freelancerId/projects',
+      decoder: (data) => data,
+    );
+    return json!
+        .cast<Map<String, dynamic>>()
+        .map(Project.fromJson)
+        .toList();
+  }
 }
