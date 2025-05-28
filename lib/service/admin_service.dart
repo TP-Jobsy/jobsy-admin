@@ -213,4 +213,26 @@ class AdminService {
       (item) => PortfolioAdminListItem.fromJson(item),
     );
   }
+
+  Future<void> activateFreelancer(int userId) async {
+    await _api.put<void>(
+      '/admin/freelancers/$userId/activate',
+      expectCode: 200,
+    );
+  }
+
+  Future<void> deactivateFreelancer(int userId) async {
+    await _api.put<void>(
+      '/admin/freelancers/$userId/deactivate',
+      expectCode: 200,
+    );
+  }
+
+  Future<void> activateClient(int userId) async {
+    await _api.put<void>('/admin/clients/$userId/activate', expectCode: 200);
+  }
+
+  Future<void> deactivateClient(int userId) async {
+    await _api.put<void>('/admin/clients/$userId/deactivate', expectCode: 200);
+  }
 }
