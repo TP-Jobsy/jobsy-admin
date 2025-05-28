@@ -39,12 +39,26 @@ class _UserDetailPageState extends State<UserDetailPage> {
   FreelancerProfile? _freelancer;
   List<Project> _projects = [];
   List<FreelancerPortfolio> _portfolios = [];
+  late final ApiClient _apiClient;
+  late final AdminService _service;
 
   bool _loading = true;
 
   @override
   void initState() {
     super.initState();
+
+    final auth = context.read<AdminAuthProvider>();
+    _apiClient = ApiClient(
+      baseUrl: Routes.apiBase,
+      getToken: () async {
+        await auth.ensureLoaded();
+        return auth.token;
+      },
+      refreshToken: () async => auth.refreshTokens(),
+    );
+    _service = AdminService(client: _apiClient);
+
     _loadData();
   }
 
@@ -98,35 +112,82 @@ class _UserDetailPageState extends State<UserDetailPage> {
           ? const Center(child: CircularProgressIndicator())
           : Column(
         children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(50, 30, 50, 24),
-            child: Row(
-              children: [
-                InkWell(
-                  onTap: () => Navigator.of(context).pop(),
-                  borderRadius: BorderRadius.circular(8),
-                  child: const Icon(Icons.arrow_back_ios, size: 20),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+            decoration: BoxDecoration(
+              color: _status == 'Активен'
+                  ? const Color(0xFFE6F4EA)
+                  : const Color(0xFFFDEAEA),
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(
+                color: _status == 'Активен'
+                    ? const Color(0xFF1E8E3E)
+                    : const Color(0xFFB00020),
+              ),
+            ),
+            child: DropdownButtonHideUnderline(
+              child: DropdownButton<String>(
+                value: _status,
+                icon: Icon(
+                  Icons.arrow_drop_down,
+                  color: _status == 'Активен'
+                      ? const Color(0xFF1E8E3E)
+                      : const Color(0xFFB00020),
                 ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: Text(
-                    _getPageTitle(),
-                    style: const TextStyle(
-                        fontSize: 24, fontWeight: FontWeight.w600),
+                items: const [
+                  DropdownMenuItem(
+                    value: 'Активен',
+                    child: Text('Активен'),
                   ),
+                  DropdownMenuItem(
+                    value: 'Заблокирован',
+                    child: Text('Заблокирован'),
+                  ),
+                ],
+                onChanged: (newStatus) async {
+                  if (newStatus == null || newStatus == _status) return;
+                  setState(() => _loading = true);
+                  try {
+                    final id = int.parse(widget.userId);
+                    if (newStatus == 'Заблокирован') {
+                      if (isClient) {
+                        await _service.deactivateClient(id);
+                      } else {
+                        await _service.deactivateFreelancer(id);
+                      }
+                    } else {
+                      if (isClient) {
+                        await _service.activateClient(id);
+                      } else {
+                        await _service.activateFreelancer(id);
+                      }
+                    }
+                    setState(() {
+                      _status = newStatus;
+                    });
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(newStatus == 'Активен'
+                            ? 'Пользователь активирован'
+                            : 'Пользователь заблокирован'),
+                      ),
+                    );
+                  } catch (e) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Ошибка: $e')),
+                    );
+                  } finally {
+                    setState(() => _loading = false);
+                  }
+                },
+                dropdownColor: Colors.white,
+                style: TextStyle(
+                  color: _status == 'Активен'
+                      ? const Color(0xFF1E8E3E)
+                      : const Color(0xFFB00020),
+                  fontWeight: FontWeight.w600,
                 ),
-                DropdownButton<String>(
-                  value: _status,
-                  underline: const SizedBox(),
-                  items: ['Активен', 'Заблокирован']
-                      .map((s) => DropdownMenuItem(
-                      value: s, child: Text(s)))
-                      .toList(),
-                  onChanged: (v) {
-                    if (v != null) setState(() => _status = v);
-                  },
-                ),
-              ],
+              ),
             ),
           ),
           Expanded(child: _buildContent()),
@@ -138,12 +199,6 @@ class _UserDetailPageState extends State<UserDetailPage> {
         ],
       ),
     );
-  }
-
-  String _getPageTitle() {
-    if (_currentPage == 1) return 'Основная информация';
-    if (_currentPage == 2) return isClient ? 'Проекты' : 'Проекты фрилансера';
-    return 'Портфолио';
   }
 
   Widget _buildContent() {
