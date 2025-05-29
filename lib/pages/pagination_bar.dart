@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 import '../../util/palette.dart';
 
 typedef PageChanged = void Function(int newPage);
@@ -45,9 +46,10 @@ class PaginationBar extends StatelessWidget {
                       bottomLeft: Radius.circular(24),
                     ),
                     child: Center(
-                      child: Icon(
-                        Icons.chevron_left,
-                        size: 16,
+                      child: SvgPicture.asset(
+                        'assets/icons/ArrowRight.svg',
+                        width: 16,
+                        height: 16,
                         color: currentPage > 1
                             ? Palette.black
                             : Palette.grey3,
