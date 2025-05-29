@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
 import '../../util/palette.dart';
+import '../model/error_snackbar.dart';
 import '../provider/auth_provider.dart';
 import 'confirm_screen.dart';
 
@@ -25,17 +26,23 @@ class _AdminLoginPageState extends State<AdminLoginPage> {
   Future<void> _requestCode() async {
     final email = _emailCtrl.text.trim();
     if (email.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Введите, пожалуйста, e-mail')),
+      ErrorSnackbar.show(
+        context,
+        type: ErrorType.warning,
+        title: 'Внимание',
+        message: 'Введите, пожалуйста, e-mail',
       );
       return;
     }
 
     setState(() => _loading = true);
     try {
-      final resp = await context.read<AdminAuthProvider>().requestCode(email);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(resp.message)),
+      await context.read<AdminAuthProvider>().requestCode(email);
+          ErrorSnackbar.show(
+            context,
+            type: ErrorType.success,
+            title: 'Успех',
+            message: 'Код отправлен',
       );
       Navigator.of(context).push(
         MaterialPageRoute(
@@ -43,8 +50,11 @@ class _AdminLoginPageState extends State<AdminLoginPage> {
         ),
       );
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Ошибка: ${e.toString()}')),
+      ErrorSnackbar.show(
+        context,
+        type: ErrorType.error,
+        title: 'Ошибка',
+        message: e.toString(),
       );
     } finally {
       setState(() => _loading = false);
