@@ -1,9 +1,5 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:jobsy_admin/pages/sidebar.dart';
-
 import '../util/palette.dart';
-import 'admin_layout.dart';
 
 class AbstractTablePage<T> extends StatelessWidget {
   final Future<List<T>> futureList;
@@ -32,33 +28,36 @@ class AbstractTablePage<T> extends StatelessWidget {
           }
           final items = snap.data ?? [];
 
-          return SingleChildScrollView(
-            padding: const EdgeInsets.fromLTRB(50, 30, 50, 24),
-            child: LayoutBuilder(
-              builder: (ctx, constraints) {
-                final availableWidth = constraints.maxWidth;
-                return SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  child: ConstrainedBox(
-                    constraints: BoxConstraints(minWidth: availableWidth),
-                    child: DataTableTheme(
-                      data: DataTableThemeData(
-                        dividerThickness: 0,
-                        dataRowColor: WidgetStateProperty.all(Palette.white),
-                        headingRowColor: WidgetStateProperty.all(Palette.white),
-                      ),
+          return Theme(
+            data: Theme.of(context).copyWith(
+              dividerTheme: DividerThemeData(
+                color: Palette.grey3.withOpacity(0.4),
+                space: 1,
+              ),
+            ),
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.fromLTRB(50, 30, 50, 24),
+              child: LayoutBuilder(
+                builder: (ctx, constraints) {
+                  return SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: ConstrainedBox(
+                      constraints: BoxConstraints(minWidth: constraints.maxWidth),
                       child: DataTable(
-                        decoration: BoxDecoration(color: Palette.white),
+                        dividerThickness: 1,
+                        dataRowHeight: 56,
                         columnSpacing: 24,
                         horizontalMargin: 12,
-                        dataRowHeight: 56,
                         columns: columns,
                         rows: items.map(buildRow).toList(),
+                        decoration: BoxDecoration(
+                          color: Palette.white,
+                        ),
                       ),
                     ),
-                  ),
-                );
-              },
+                  );
+                },
+              ),
             ),
           );
         },
