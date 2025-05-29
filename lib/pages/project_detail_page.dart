@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:provider/provider.dart';
 import 'package:jobsy_admin/pages/sidebar.dart';
 import '../model/project/project.dart';
@@ -67,7 +68,9 @@ class _ProjectDetailPageState extends State<ProjectDetailPage> {
           ? const Center(child: CircularProgressIndicator())
           : _project == null
           ? const Center(child: Text('Проект не найден'))
-          : _buildContent(_project!),
+          : SingleChildScrollView(
+        child: _buildContent(_project!),
+      ),
     );
   }
 
@@ -89,7 +92,12 @@ class _ProjectDetailPageState extends State<ProjectDetailPage> {
             children: [
               InkWell(
                 onTap: () => Navigator.of(context).pop(),
-                child: const Icon(Icons.arrow_back_ios, size: 20),
+                child: SvgPicture.asset(
+                  'assets/icons/ArrowLeft.svg',
+                  width: 20,
+                  height: 20,
+                  color: Palette.black,
+                ),
               ),
               const SizedBox(width: 16),
               const Text(
@@ -100,9 +108,9 @@ class _ProjectDetailPageState extends State<ProjectDetailPage> {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                 decoration: BoxDecoration(
-                  color: Colors.grey.shade100,
+                  color: Palette.dotInactive,
                   borderRadius: BorderRadius.circular(15),
-                  border: Border.all(color: Colors.grey.shade300),
+                  border: Border.all(color: Palette.grey3),
                 ),
                 child: Text(
                   project.status.name,
