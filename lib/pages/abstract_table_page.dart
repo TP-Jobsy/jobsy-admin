@@ -20,7 +20,7 @@ class AbstractTablePage<T> extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: Colors.white,
+      color: Palette.white,
       child: FutureBuilder<List<T>>(
         future: futureList,
         builder: (ctx, snap) {
@@ -44,8 +44,8 @@ class AbstractTablePage<T> extends StatelessWidget {
                     child: DataTableTheme(
                       data: DataTableThemeData(
                         dividerThickness: 0,
-                        dataRowColor: WidgetStateProperty.all(Colors.white),
-                        headingRowColor: WidgetStateProperty.all(Colors.white),
+                        dataRowColor: WidgetStateProperty.all(Palette.white),
+                        headingRowColor: WidgetStateProperty.all(Palette.white),
                       ),
                       child: DataTable(
                         decoration: BoxDecoration(color: Palette.white),
