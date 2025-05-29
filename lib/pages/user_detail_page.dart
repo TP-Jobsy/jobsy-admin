@@ -310,31 +310,68 @@ class _UserDetailPageState extends State<UserDetailPage> {
     if (_projects.isEmpty) {
       return const Center(child: Text('Нет проектов'));
     }
-    return ListView.separated(
-      padding: const EdgeInsets.symmetric(horizontal: 60, vertical: 16),
-      itemCount: _projects.length,
-      separatorBuilder: (_, __) => const SizedBox(height: 12),
-      itemBuilder: (_, i) {
-        final p = _projects[i];
-        return ListTile(
-          title: Text(p.title),
-          subtitle: Text('ID: ${p.id} | ${_formatDate(p.createdAt)}'),
-          trailing: SvgPicture.asset(
-            'assets/icons/ArrowRight.svg',
-            width: 16,
-            height: 16,
-            color: Palette.black,
-          ),
-          onTap: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (_) => ProjectDetailPage(projectId: p.id),
+
+    return SingleChildScrollView(
+      padding: const EdgeInsets.fromLTRB(60, 0, 50, 0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const SizedBox(height: 20),
+          ..._projects.map((p) => Padding(
+            padding: const EdgeInsets.only(bottom: 20),
+            child: InkWell(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => ProjectDetailPage(projectId: p.id),
+                  ),
+                );
+              },
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                decoration: BoxDecoration(
+                  color: Palette.white,
+                  borderRadius: BorderRadius.circular(24),
+                  border: Border.all(color: Palette.grey3),
+                ),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            p.title,
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            'ID: ${p.id} | ${_formatDate(p.createdAt)}',
+                            style: const TextStyle(
+                              fontSize: 14,
+                              color: Palette.grey2,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    SvgPicture.asset(
+                      'assets/icons/ArrowRight.svg',
+                      width: 16,
+                      height: 16,
+                      color: Palette.black,
+                    ),
+                  ],
+                ),
               ),
-            );
-          },
-        );
-      },
+            ),
+          )),
+        ],
+      ),
     );
   }
 
@@ -342,31 +379,68 @@ class _UserDetailPageState extends State<UserDetailPage> {
     if (_portfolios.isEmpty) {
       return const Center(child: Text('Нет портфолио'));
     }
-    return ListView.separated(
-      padding: const EdgeInsets.symmetric(horizontal: 60, vertical: 16),
-      itemCount: _portfolios.length,
-      separatorBuilder: (_, __) => const SizedBox(height: 12),
-      itemBuilder: (_, i) {
-        final pf = _portfolios[i];
-        return ListTile(
-          title: Text(pf.title),
-          subtitle: Text('ID: ${pf.id} | ${_formatDate(pf.createdAt)}'),
-          trailing: SvgPicture.asset(
-            'assets/icons/ArrowRight.svg',
-            width: 16,
-            height: 16,
-            color: Palette.black,
-          ),
-          onTap: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (_) => PortfolioDetailPage(portfolioId: pf.id),
+
+    return SingleChildScrollView(
+      padding: const EdgeInsets.fromLTRB(60, 0, 50, 0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const SizedBox(height: 20),
+          ..._portfolios.map((pf) => Padding(
+            padding: const EdgeInsets.only(bottom: 20),
+            child: InkWell(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => PortfolioDetailPage(portfolioId: pf.id),
+                  ),
+                );
+              },
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                decoration: BoxDecoration(
+                  color: Palette.white,
+                  borderRadius: BorderRadius.circular(24),
+                  border: Border.all(color: Palette.grey3),
+                ),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            pf.title,
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            'ID: ${pf.id} | ${_formatDate(pf.createdAt)}',
+                            style: const TextStyle(
+                              fontSize: 14,
+                              color: Palette.grey2,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    SvgPicture.asset(
+                      'assets/icons/ArrowRight.svg',
+                      width: 16,
+                      height: 16,
+                      color: Palette.black,
+                    ),
+                  ],
+                ),
               ),
-            );
-          },
-        );
-      },
+            ),
+          )),
+        ],
+      ),
     );
   }
 
