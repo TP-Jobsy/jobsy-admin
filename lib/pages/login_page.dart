@@ -92,10 +92,10 @@ class _AdminLoginPageState extends State<AdminLoginPage> {
                           contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
                           suffixIcon: Padding(
                             padding: const EdgeInsets.only(right: 20),
-                            child: SvgPicture.asset('assets/icons/Inbox.svg', width: 23, height: 23, color: Palette.grey1),
+                            child: SvgPicture.asset('assets/icons/Inbox.svg', width: 23, height: 23, color: Palette.secondaryIcon),
                           ),
-                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(24), borderSide: const BorderSide(color: Palette.grey3)),
-                          enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(24), borderSide: const BorderSide(color: Palette.grey3)),
+                          focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(24), borderSide: BorderSide(color: Palette.grey3, width: 2)),
+                          enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(24), borderSide: BorderSide(color: Palette.grey3)),
                         ),
                       ),
                     ),
