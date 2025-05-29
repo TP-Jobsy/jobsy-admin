@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:jobsy_admin/pages/sidebar.dart';
 import 'package:provider/provider.dart';
 import '../../model/client/client_profile.dart';
@@ -122,114 +123,105 @@ class _UserDetailPageState extends State<UserDetailPage> {
   Widget build(BuildContext context) {
     return AdminLayout(
       currentSection: AdminSection.users,
-      child:
-          _loading
-              ? const Center(child: CircularProgressIndicator())
-              : Column(
+      child: _loading
+          ? const Center(child: CircularProgressIndicator())
+          : Column(
+        children: [
+          if (_currentPage == 1)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(50, 30, 50, 24),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.end,
                 children: [
-                  if (_currentPage == 1)
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(50, 30, 50, 24),
-                      child: Row(
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 12,
-                              vertical: 6,
-                            ),
-                            decoration: BoxDecoration(
-                              color:
-                                  _status == 'Активен'
-                                      ? const Color(0xFFE6F4EA)
-                                      : const Color(0xFFFDEAEA),
-                              borderRadius: BorderRadius.circular(8),
-                              border: Border.all(
-                                color:
-                                    _status == 'Активен'
-                                        ? const Color(0xFF1E8E3E)
-                                        : const Color(0xFFB00020),
-                              ),
-                            ),
-                            child: DropdownButtonHideUnderline(
-                              child: DropdownButton<String>(
-                                value: _status,
-                                icon: Icon(
-                                  Icons.arrow_drop_down,
-                                  color:
-                                      _status == 'Активен'
-                                          ? const Color(0xFF1E8E3E)
-                                          : const Color(0xFFB00020),
-                                ),
-                                items: const [
-                                  DropdownMenuItem(
-                                    value: 'Активен',
-                                    child: Text('Активен'),
-                                  ),
-                                  DropdownMenuItem(
-                                    value: 'Заблокирован',
-                                    child: Text('Заблокирован'),
-                                  ),
-                                ],
-                                onChanged: (newStatus) async {
-                                  if (newStatus == null || newStatus == _status)
-                                    return;
-                                  setState(() => _loading = true);
-                                  final id = int.parse(widget.userId);
-                                  try {
-                                    if (newStatus == 'Заблокирован') {
-                                      isClient
-                                          ? await _service.deactivateClient(id)
-                                          : await _service.deactivateFreelancer(
-                                            id,
-                                          );
-                                    } else {
-                                      isClient
-                                          ? await _service.activateClient(id)
-                                          : await _service.activateFreelancer(
-                                            id,
-                                          );
-                                    }
-                                    setState(() => _status = newStatus);
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(
-                                        content: Text(
-                                          newStatus == 'Активен'
-                                              ? 'Пользователь активирован'
-                                              : 'Пользователь заблокирован',
-                                        ),
-                                      ),
-                                    );
-                                  } catch (e) {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(content: Text('Ошибка: $e')),
-                                    );
-                                  } finally {
-                                    setState(() => _loading = false);
-                                  }
-                                },
-                                dropdownColor: Colors.white,
-                                style: TextStyle(
-                                  color:
-                                      _status == 'Активен'
-                                          ? const Color(0xFF1E8E3E)
-                                          : const Color(0xFFB00020),
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 6,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Palette.white,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: _status == 'Активен'
+                            ? Palette.grey3
+                            : Palette.bloodred,
                       ),
                     ),
-
-                  Expanded(child: _buildContent()),
-                  PaginationBar(
-                    currentPage: _currentPage,
-                    totalPages: isClient ? 2 : 3,
-                    onPageChanged: _onPageChanged,
+                    child: DropdownButtonHideUnderline(
+                      child: DropdownButton<String>(
+                        value: _status,
+                        icon: Padding(
+                          padding: const EdgeInsets.only(left: 4),
+                          child: SvgPicture.asset(
+                            'assets/icons/ArrowDown.svg',
+                            width: 15,
+                            height: 15,
+                            color: _status == 'Активен'
+                                ? Palette.grey3
+                                : Palette.bloodred,
+                          ),
+                        ),
+                        items: const [
+                          DropdownMenuItem(
+                              value: 'Активен', child: Text('Активен')),
+                          DropdownMenuItem(
+                              value: 'Заблокирован', child: Text('Заблокирован')),
+                        ],
+                        onChanged: (newStatus) async {
+                          if (newStatus == null || newStatus == _status) return;
+                          setState(() => _loading = true);
+                          final id = int.parse(widget.userId);
+                          try {
+                            if (newStatus == 'Заблокирован') {
+                              isClient
+                                  ? await _service.deactivateClient(id)
+                                  : await _service.deactivateFreelancer(id);
+                            } else {
+                              isClient
+                                  ? await _service.activateClient(id)
+                                  : await _service.activateFreelancer(id);
+                            }
+                            setState(() => _status = newStatus);
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(
+                                  newStatus == 'Активен'
+                                      ? 'Пользователь активирован'
+                                      : 'Пользователь заблокирован',
+                                ),
+                              ),
+                            );
+                          } catch (e) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text('Ошибка: $e')),
+                            );
+                          } finally {
+                            setState(() => _loading = false);
+                          }
+                        },
+                        dropdownColor: Palette.white,
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: _status == 'Активен'
+                              ? Palette.black
+                              : Palette.bloodred,
+                        ),
+                        isDense: true,
+                      ),
+                    ),
                   ),
                 ],
               ),
+            ),
+
+          Expanded(child: _buildContent()),
+          PaginationBar(
+            currentPage: _currentPage,
+            totalPages: isClient ? 2 : 3,
+            onPageChanged: _onPageChanged,
+          ),
+        ],
+      ),
     );
   }
 
@@ -311,7 +303,12 @@ class _UserDetailPageState extends State<UserDetailPage> {
         return ListTile(
           title: Text(p.title),
           subtitle: Text('ID: ${p.id} | ${_formatDate(p.createdAt)}'),
-          trailing: const Icon(Icons.arrow_forward_ios),
+          trailing: SvgPicture.asset(
+            'assets/icons/ArrowRight.svg',
+            width: 16,
+            height: 16,
+            color: Palette.black,
+          ),
           onTap: () {
             Navigator.push(
               context,
@@ -338,7 +335,12 @@ class _UserDetailPageState extends State<UserDetailPage> {
         return ListTile(
           title: Text(pf.title),
           subtitle: Text('ID: ${pf.id} | ${_formatDate(pf.createdAt)}'),
-          trailing: const Icon(Icons.arrow_forward_ios),
+          trailing: SvgPicture.asset(
+            'assets/icons/ArrowRight.svg',
+            width: 16,
+            height: 16,
+            color: Palette.black,
+          ),
           onTap: () {
             Navigator.push(
               context,
@@ -367,7 +369,7 @@ class _UserDetailPageState extends State<UserDetailPage> {
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: Palette.white,
                 borderRadius: BorderRadius.circular(24),
                 border: Border.all(color: Palette.grey3),
               ),
