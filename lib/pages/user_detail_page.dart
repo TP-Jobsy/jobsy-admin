@@ -12,6 +12,7 @@ import '../../service/api_client.dart';
 import '../../util/palette.dart';
 import '../../util/routes.dart';
 import '../../widgets/avatar.dart';
+import '../model/error_snackbar.dart';
 import 'admin_layout.dart';
 import 'pagination_bar.dart';
 import 'portfolio_detail_page.dart';
@@ -74,7 +75,12 @@ class _UserDetailPageState extends State<UserDetailPage> {
         _status = _freelancer!.user.isActive ? 'Активен' : 'Заблокирован';
       }
     } catch (e) {
-      debugPrint('Ошибка загрузки профиля: $e');
+      ErrorSnackbar.show(
+        context,
+        type: ErrorType.error,
+        title: 'Ошибка загрузки профиля',
+        message: '$e',
+      );
     } finally {
       setState(() => _loading = false);
     }
@@ -90,7 +96,12 @@ class _UserDetailPageState extends State<UserDetailPage> {
         _projects = await _service.getFreelancerProjects(id);
       }
     } catch (e) {
-      debugPrint('Ошибка загрузки проектов: $e');
+      ErrorSnackbar.show(
+        context,
+        type: ErrorType.error,
+        title: 'Ошибка загрузки проектов',
+        message: '$e',
+      );
     } finally {
       setState(() => _loading = false);
     }
@@ -102,7 +113,12 @@ class _UserDetailPageState extends State<UserDetailPage> {
     try {
       _portfolios = await _service.getFreelancerPortfolio(id);
     } catch (e) {
-      debugPrint('Ошибка загрузки портфолио: $e');
+      ErrorSnackbar.show(
+        context,
+        type: ErrorType.error,
+        title: 'Ошибка загрузки портфолио',
+        message: '$e',
+      );
     } finally {
       setState(() => _loading = false);
     }
