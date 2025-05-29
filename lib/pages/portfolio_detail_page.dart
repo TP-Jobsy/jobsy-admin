@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:provider/provider.dart';
 import '../model/portfolio/portfolio.dart';
 import '../provider/auth_provider.dart';
@@ -81,7 +82,12 @@ class _PortfolioDetailPageState extends State<PortfolioDetailPage> {
             children: [
               InkWell(
                 onTap: () => Navigator.of(context).pop(),
-                child: const Icon(Icons.arrow_back_ios, size: 20),
+                child: SvgPicture.asset(
+                  'assets/icons/ArrowLeft.svg',
+                  width: 20,
+                  height: 20,
+                  color: Palette.black,
+                ),
               ),
               const SizedBox(width: 16),
               const Text(
@@ -92,9 +98,9 @@ class _PortfolioDetailPageState extends State<PortfolioDetailPage> {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                 decoration: BoxDecoration(
-                  color: Colors.grey.shade100,
+                  color: Palette.dotInactive,
                   borderRadius: BorderRadius.circular(15),
-                  border: Border.all(color: Colors.grey.shade300),
+                  border: Border.all(color: Palette.grey3),
                 ),
                 child: Text(
                   'ID: ${dto.id}',
