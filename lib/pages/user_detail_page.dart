@@ -147,8 +147,17 @@ class _UserDetailPageState extends State<UserDetailPage> {
             Padding(
               padding: const EdgeInsets.fromLTRB(50, 30, 50, 24),
               child: Row(
-                mainAxisAlignment: MainAxisAlignment.end,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
+                  InkWell(
+                    onTap: () => Navigator.of(context).pop(),
+                    child: SvgPicture.asset(
+                      'assets/icons/ArrowLeft.svg',
+                      width: 20,
+                      height: 20,
+                      color: Palette.black,
+                    ),
+                  ),
                   Container(
                     padding: const EdgeInsets.symmetric(
                       horizontal: 10,
@@ -179,9 +188,13 @@ class _UserDetailPageState extends State<UserDetailPage> {
                         ),
                         items: const [
                           DropdownMenuItem(
-                              value: 'Активен', child: Text('Активен')),
+                            value: 'Активен',
+                            child: Text('Активен'),
+                          ),
                           DropdownMenuItem(
-                              value: 'Заблокирован', child: Text('Заблокирован')),
+                            value: 'Заблокирован',
+                            child: Text('Заблокирован'),
+                          ),
                         ],
                         onChanged: (newStatus) async {
                           if (newStatus == null || newStatus == _status) return;
@@ -208,8 +221,11 @@ class _UserDetailPageState extends State<UserDetailPage> {
                               ),
                             );
                           } catch (e) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text('Ошибка: $e')),
+                            ErrorSnackbar.show(
+                              context,
+                              type: ErrorType.error,
+                              title: 'Ошибка',
+                              message:'$e',
                             );
                           } finally {
                             setState(() => _loading = false);
@@ -217,12 +233,33 @@ class _UserDetailPageState extends State<UserDetailPage> {
                         },
                         dropdownColor: Palette.white,
                         style: TextStyle(
-                          fontSize: 14,
+                          fontSize: 13,
                           color: _status == 'Активен'
                               ? Palette.black
                               : Palette.bloodred,
                         ),
                         isDense: true,
+                        borderRadius: BorderRadius.circular(12),
+                        elevation: 1,
+                        menuMaxHeight: 120,
+                        itemHeight: 50,
+                        selectedItemBuilder: (BuildContext context) {
+                          return ['Активен', 'Заблокирован'].map((String value) {
+                            return Container(
+                              alignment: Alignment.centerLeft,
+                              padding: const EdgeInsets.symmetric(horizontal: 16),
+                              child: Text(
+                                value,
+                                style: TextStyle(
+                                  fontSize: 15,
+                                  color: value == 'Активен'
+                                      ? Palette.black
+                                      : Palette.bloodred,
+                                ),
+                              ),
+                            );
+                          }).toList();
+                        },
                       ),
                     ),
                   ),
