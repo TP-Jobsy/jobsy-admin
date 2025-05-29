@@ -42,17 +42,20 @@ class PaginationBar extends StatelessWidget {
                         ? () => onPageChanged(currentPage - 1)
                         : null,
                     borderRadius: const BorderRadius.only(
-                      topLeft: Radius.circular(24),
-                      bottomLeft: Radius.circular(24),
+                      topLeft: Radius.circular(15),
+                      bottomLeft: Radius.circular(15),
                     ),
                     child: Center(
-                      child: SvgPicture.asset(
-                        'assets/icons/ArrowRight.svg',
-                        width: 16,
-                        height: 16,
-                        color: currentPage > 1
-                            ? Palette.black
-                            : Palette.grey3,
+                      child: Transform.rotate(
+                        angle: 3.14159,
+                        child: SvgPicture.asset(
+                          'assets/icons/ArrowRight.svg',
+                          width: 16,
+                          height: 16,
+                          color: currentPage > 1
+                              ? Palette.black
+                              : Palette.grey3,
+                        ),
                       ),
                     ),
                   ),
@@ -68,13 +71,14 @@ class PaginationBar extends StatelessWidget {
                         ? () => onPageChanged(currentPage + 1)
                         : null,
                     borderRadius: const BorderRadius.only(
-                      topRight: Radius.circular(24),
-                      bottomRight: Radius.circular(24),
+                      topRight: Radius.circular(15),
+                      bottomRight: Radius.circular(15),
                     ),
                     child: Center(
-                      child: Icon(
-                        Icons.chevron_right,
-                        size: 16,
+                      child: SvgPicture.asset(
+                        'assets/icons/ArrowRight.svg',
+                        width: 16,
+                        height: 16,
                         color: currentPage < totalPages
                             ? Palette.black
                             : Palette.grey3,
