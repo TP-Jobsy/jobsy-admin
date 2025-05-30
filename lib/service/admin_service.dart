@@ -147,8 +147,7 @@ class AdminService {
       if (role != null) 'role': role,
       if (registeredFrom != null)
         'registeredFrom': registeredFrom.toIso8601String(),
-      if (registeredTo != null)
-        'registeredTo': registeredTo.toIso8601String(),
+      if (registeredTo != null) 'registeredTo': registeredTo.toIso8601String(),
       'page': '$page',
       'size': '$size',
     };
@@ -159,29 +158,21 @@ class AdminService {
       decoder: (data) => data,
     );
 
-    return PageResponse<User>.fromJson(
-      json!,
-          (item) => User.fromJson(item),
-    );
+    return PageResponse<User>.fromJson(json!, (item) => User.fromJson(item));
   }
-
 
   Future<PageResponse<ProjectAdminListItem>> searchProjects({
     String? term,
-    String? clientName,
     String? status,
     DateTime? createdFrom,
     DateTime? createdTo,
     int page = 0,
     int size = 20,
   }) async {
-    final query = {
+    final query = <String, String>{
       if (term != null && term.isNotEmpty) 'term': term,
-      if (clientName != null && clientName.isNotEmpty)
-        'clientName': clientName,
       if (status != null && status.isNotEmpty) 'status': status,
-      if (createdFrom != null)
-        'createdFrom': createdFrom.toIso8601String(),
+      if (createdFrom != null) 'createdFrom': createdFrom.toIso8601String(),
       if (createdTo != null) 'createdTo': createdTo.toIso8601String(),
       'page': '$page',
       'size': '$size',
@@ -190,29 +181,25 @@ class AdminService {
     final json = await _api.get<Map<String, dynamic>>(
       '/admin/projects/search',
       queryParameters: query,
-      decoder: (data) => data,
+      decoder: (d) => d,
     );
 
     return PageResponse<ProjectAdminListItem>.fromJson(
       json!,
-          (item) => ProjectAdminListItem.fromJson(item),
+      (item) => ProjectAdminListItem.fromJson(item),
     );
   }
 
   Future<PageResponse<PortfolioAdminListItem>> searchPortfolios({
     String? term,
-    String? freelancerName,
     DateTime? createdFrom,
     DateTime? createdTo,
     int page = 0,
     int size = 20,
   }) async {
-    final query = {
+    final query = <String, String>{
       if (term != null && term.isNotEmpty) 'term': term,
-      if (freelancerName != null && freelancerName.isNotEmpty)
-        'freelancerName': freelancerName,
-      if (createdFrom != null)
-        'createdFrom': createdFrom.toIso8601String(),
+      if (createdFrom != null) 'createdFrom': createdFrom.toIso8601String(),
       if (createdTo != null) 'createdTo': createdTo.toIso8601String(),
       'page': '$page',
       'size': '$size',
@@ -221,12 +208,12 @@ class AdminService {
     final json = await _api.get<Map<String, dynamic>>(
       '/admin/portfolios/search',
       queryParameters: query,
-      decoder: (data) => data,
+      decoder: (d) => d,
     );
 
     return PageResponse<PortfolioAdminListItem>.fromJson(
       json!,
-          (item) => PortfolioAdminListItem.fromJson(item),
+      (item) => PortfolioAdminListItem.fromJson(item),
     );
   }
 
@@ -257,9 +244,6 @@ class AdminService {
       '/admin/freelancers/$freelancerId/projects',
       decoder: (data) => data,
     );
-    return json!
-        .cast<Map<String, dynamic>>()
-        .map(Project.fromJson)
-        .toList();
+    return json!.cast<Map<String, dynamic>>().map(Project.fromJson).toList();
   }
 }

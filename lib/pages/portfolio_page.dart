@@ -48,7 +48,6 @@ class _PortfoliosPageState extends State<PortfoliosPage> {
     setState(() => _loading = true);
     final response = await adminService.searchPortfolios(
       term: _searchTerm,
-      freelancerName: _searchTerm,
     );
     setState(() {
       _portfolios = response.content;
