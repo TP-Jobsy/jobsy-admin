@@ -48,8 +48,7 @@ class _UsersPageState extends State<UsersPage> {
   void _loadUsers() async {
     setState(() => _loading = true);
     final response = await adminService.searchUsers(
-      firstName: _searchTerm,
-      lastName: _searchTerm,
+      term: _searchTerm,
     );
     setState(() {
       _users =

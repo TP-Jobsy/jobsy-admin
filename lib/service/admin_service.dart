@@ -135,20 +135,20 @@ class AdminService {
   }
 
   Future<PageResponse<User>> searchUsers({
-    String? email,
-    String? firstName,
-    String? lastName,
-    String? phone,
+    String? term,
     String? role,
+    DateTime? registeredFrom,
+    DateTime? registeredTo,
     int page = 0,
     int size = 20,
   }) async {
     final query = {
-      if (email != null) 'email': email,
-      if (firstName != null) 'firstName': firstName,
-      if (lastName != null) 'lastName': lastName,
-      if (phone != null) 'phone': phone,
+      if (term != null && term.isNotEmpty) 'term': term,
       if (role != null) 'role': role,
+      if (registeredFrom != null)
+        'registeredFrom': registeredFrom.toIso8601String(),
+      if (registeredTo != null)
+        'registeredTo': registeredTo.toIso8601String(),
       'page': '$page',
       'size': '$size',
     };
@@ -159,20 +159,30 @@ class AdminService {
       decoder: (data) => data,
     );
 
-    return PageResponse<User>.fromJson(json!, (item) => User.fromJson(item));
+    return PageResponse<User>.fromJson(
+      json!,
+          (item) => User.fromJson(item),
+    );
   }
+
 
   Future<PageResponse<ProjectAdminListItem>> searchProjects({
     String? term,
-    String? status,
     String? clientName,
+    String? status,
+    DateTime? createdFrom,
+    DateTime? createdTo,
     int page = 0,
     int size = 20,
   }) async {
     final query = {
-      if (term != null) 'term': term,
-      if (status != null) 'status': status,
-      if (clientName != null) 'clientName': clientName,
+      if (term != null && term.isNotEmpty) 'term': term,
+      if (clientName != null && clientName.isNotEmpty)
+        'clientName': clientName,
+      if (status != null && status.isNotEmpty) 'status': status,
+      if (createdFrom != null)
+        'createdFrom': createdFrom.toIso8601String(),
+      if (createdTo != null) 'createdTo': createdTo.toIso8601String(),
       'page': '$page',
       'size': '$size',
     };
@@ -185,19 +195,25 @@ class AdminService {
 
     return PageResponse<ProjectAdminListItem>.fromJson(
       json!,
-      (item) => ProjectAdminListItem.fromJson(item),
+          (item) => ProjectAdminListItem.fromJson(item),
     );
   }
 
   Future<PageResponse<PortfolioAdminListItem>> searchPortfolios({
     String? term,
     String? freelancerName,
+    DateTime? createdFrom,
+    DateTime? createdTo,
     int page = 0,
     int size = 20,
   }) async {
     final query = {
-      if (term != null) 'term': term,
-      if (freelancerName != null) 'freelancerName': freelancerName,
+      if (term != null && term.isNotEmpty) 'term': term,
+      if (freelancerName != null && freelancerName.isNotEmpty)
+        'freelancerName': freelancerName,
+      if (createdFrom != null)
+        'createdFrom': createdFrom.toIso8601String(),
+      if (createdTo != null) 'createdTo': createdTo.toIso8601String(),
       'page': '$page',
       'size': '$size',
     };
@@ -210,7 +226,7 @@ class AdminService {
 
     return PageResponse<PortfolioAdminListItem>.fromJson(
       json!,
-      (item) => PortfolioAdminListItem.fromJson(item),
+          (item) => PortfolioAdminListItem.fromJson(item),
     );
   }
 
