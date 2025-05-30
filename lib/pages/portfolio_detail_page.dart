@@ -125,8 +125,7 @@ class _PortfolioDetailPageState extends State<PortfolioDetailPage> {
                   if (confirm == true) {
                     try {
                       await _adminService.deletePortfolio(
-                        dto.freelancerId,
-                        dto.id,
+                        dto.freelancerId, dto.id,
                       );
                       Navigator.of(context).pop();
                       ScaffoldMessenger.of(context).showSnackBar(
