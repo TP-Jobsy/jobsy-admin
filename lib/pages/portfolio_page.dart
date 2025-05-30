@@ -25,6 +25,8 @@ class _PortfoliosPageState extends State<PortfoliosPage> {
   bool _loading = true;
   late final AdminService adminService;
 
+  DateTime? _filterFrom, _filterTo;
+
   @override
   void initState() {
     super.initState();
@@ -44,13 +46,73 @@ class _PortfoliosPageState extends State<PortfoliosPage> {
     _loadPortfolios();
   }
 
+  Future<_DateFilterResult?> _showDateFilterDialog() {
+    DateTime? from = _filterFrom;
+    DateTime? to = _filterTo;
+
+    return showDialog<_DateFilterResult>(
+      context: context,
+      builder:
+          (ctx) => AlertDialog(
+            title: const Text('Фильтр по дате создания'),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextFormField(
+                  decoration: const InputDecoration(
+                    labelText: 'С (yyyy-MM-dd)',
+                  ),
+                  initialValue: from?.toIso8601String().substring(0, 10),
+                  onChanged:
+                      (v) => from = v.isEmpty ? null : DateTime.tryParse(v),
+                ),
+                const SizedBox(height: 12),
+                TextFormField(
+                  decoration: const InputDecoration(
+                    labelText: 'По (yyyy-MM-dd)',
+                  ),
+                  initialValue: to?.toIso8601String().substring(0, 10),
+                  onChanged:
+                      (v) => to = v.isEmpty ? null : DateTime.tryParse(v),
+                ),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed:
+                    () => Navigator.of(
+                      ctx,
+                    ).pop(const _DateFilterResult(null, null)),
+                child: const Text('Сбросить'),
+              ),
+              ElevatedButton(
+                onPressed:
+                    () => Navigator.of(ctx).pop(_DateFilterResult(from, to)),
+                child: const Text('Применить'),
+              ),
+            ],
+          ),
+    );
+  }
+
+  void _onFilterTap() async {
+    final res = await _showDateFilterDialog();
+    if (res != null) {
+      _filterFrom = res.from;
+      _filterTo = res.to;
+      _loadPortfolios();
+    }
+  }
+
   void _loadPortfolios() async {
     setState(() => _loading = true);
-    final response = await adminService.searchPortfolios(
+    final resp = await adminService.searchPortfolios(
       term: _searchTerm,
+      createdFrom: _filterFrom,
+      createdTo: _filterTo,
     );
     setState(() {
-      _portfolios = response.content;
+      _portfolios = resp.content;
       _loading = false;
     });
   }
@@ -65,6 +127,7 @@ class _PortfoliosPageState extends State<PortfoliosPage> {
     return AdminLayout(
       currentSection: AdminSection.portfolio,
       onSearch: _onSearch,
+      onFilter: _onFilterTap,
       child:
           _loading
               ? const Center(child: CircularProgressIndicator())
@@ -118,3 +181,8 @@ const TextStyle _headerStyle = TextStyle(
   fontFamily: 'Inter',
   fontSize: 16,
 );
+
+class _DateFilterResult {
+  final DateTime? from, to;
+  const _DateFilterResult(this.from, this.to);
+}
