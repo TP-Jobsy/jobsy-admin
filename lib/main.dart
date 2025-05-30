@@ -54,14 +54,6 @@ class MyApp extends StatelessWidget {
         Routes.users: (_) => UsersPage(),
         Routes.projects: (_) => ProjectsPage(),
         Routes.portfolio: (_) => PortfoliosPage(),
-        Routes.projectDetail: (ctx) {
-          final id = ModalRoute.of(ctx)!.settings.arguments as int;
-          return ProjectDetailPage(projectId: id);
-        },
-        Routes.portfolioDetail: (ctx) {
-          final id = ModalRoute.of(ctx)!.settings.arguments as int;
-          return PortfolioDetailPage(portfolioId: id);
-        },
       },
       onGenerateRoute: (settings) {
         switch (settings.name) {
@@ -72,6 +64,17 @@ class MyApp extends StatelessWidget {
                 userId: args['id']!,
                 role:   args['role']!,
               ),
+            );
+          case Routes.projectDetail:
+            final projectId = settings.arguments as int;
+            return MaterialPageRoute(
+              builder: (_) => ProjectDetailPage(projectId: projectId),
+            );
+
+          case Routes.portfolioDetail:
+            final portfolioId = settings.arguments as int;
+            return MaterialPageRoute(
+              builder: (_) => PortfolioDetailPage(portfolioId: portfolioId),
             );
 
         }
