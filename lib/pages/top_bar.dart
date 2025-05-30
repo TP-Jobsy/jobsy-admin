@@ -49,7 +49,7 @@ class TopBar extends StatelessWidget {
                     boxShadow: const [
                       BoxShadow(
                         color: Palette.black1,
-                        blurRadius: 2,
+                        blurRadius: 1,
                         offset: Offset(0, 1),
                       ),
                     ],

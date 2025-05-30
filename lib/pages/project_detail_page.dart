@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:provider/provider.dart';
 import 'package:jobsy_admin/pages/sidebar.dart';
 import '../model/project/project.dart';
@@ -70,6 +71,7 @@ class _ProjectDetailPageState extends State<ProjectDetailPage> {
               : _project == null
               ? const Center(child: Text('Проект не найден'))
               : _buildContent(_project!),
+
     );
   }
 
@@ -93,7 +95,12 @@ class _ProjectDetailPageState extends State<ProjectDetailPage> {
             children: [
               InkWell(
                 onTap: () => Navigator.of(context).pop(),
-                child: const Icon(Icons.arrow_back_ios, size: 20),
+                child: SvgPicture.asset(
+                  'assets/icons/ArrowLeft.svg',
+                  width: 20,
+                  height: 20,
+                  color: Palette.black,
+                ),
               ),
               const SizedBox(width: 16),
               const Text(
