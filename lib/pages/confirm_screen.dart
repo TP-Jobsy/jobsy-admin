@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
 
+import '../model/error_snackbar.dart';
 import '../provider/auth_provider.dart';
 import '../util/palette.dart';
 import '../util/routes.dart';
@@ -69,8 +70,11 @@ class _ConfirmScreenState extends State<ConfirmScreen> {
   Future<void> _confirm() async {
     final code = _codeCtrls.map((c) => c.text).join();
     if (code.length < 4) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Введите полный 4-значный код')),
+      ErrorSnackbar.show(
+        context,
+        type: ErrorType.warning,
+        title: 'Внимание',
+        message: 'Введите полный 4-значный код',
       );
       return;
     }
@@ -80,8 +84,11 @@ class _ConfirmScreenState extends State<ConfirmScreen> {
       await context.read<AdminAuthProvider>().confirmCode(widget.email, code);
       Navigator.of(context).pushReplacementNamed(Routes.users);
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Ошибка подтверждения: ${e.toString()}')),
+      ErrorSnackbar.show(
+        context,
+        type: ErrorType.error,
+        title: 'Ошибка подтверждения',
+        message:  e.toString(),
       );
     } finally {
       setState(() => _loading = false);
@@ -91,16 +98,21 @@ class _ConfirmScreenState extends State<ConfirmScreen> {
   Future<void> _resendCode() async {
     setState(() => _resending = true);
     try {
-      final resp =
       await context.read<AdminAuthProvider>().requestCode(widget.email);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(resp.message)),
+      ErrorSnackbar.show(
+        context,
+        type: ErrorType.success,
+        title: 'Успех',
+        message: 'Код отправлен',
       );
       for (var c in _codeCtrls) c.clear();
       _focusNodes[0].requestFocus();
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Не удалось выслать код: ${e.toString()}')),
+      ErrorSnackbar.show(
+        context,
+        type: ErrorType.error,
+        title: 'Не удалось выслать код',
+        message:  e.toString(),
       );
     } finally {
       setState(() => _resending = false);
@@ -159,7 +171,7 @@ class _ConfirmScreenState extends State<ConfirmScreen> {
                             child: _resending
                                 ? const CircularProgressIndicator()
                                 : const Text(
-                              'Отправить ещё раз код',
+                              'Отправить код повторно',
                               style: TextStyle(
                                   color: Palette.primary,
                                   fontSize: 18,

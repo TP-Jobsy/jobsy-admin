@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:provider/provider.dart';
 import '../model/portfolio/portfolio.dart';
 import '../provider/auth_provider.dart';
@@ -84,7 +85,12 @@ class _PortfolioDetailPageState extends State<PortfolioDetailPage> {
             children: [
               InkWell(
                 onTap: () => Navigator.of(context).pop(),
-                child: const Icon(Icons.arrow_back_ios, size: 20),
+                child: SvgPicture.asset(
+                  'assets/icons/ArrowLeft.svg',
+                  width: 20,
+                  height: 20,
+                  color: Palette.black,
+                ),
               ),
               const SizedBox(width: 16),
               const Text(

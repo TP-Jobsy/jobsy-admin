@@ -73,7 +73,7 @@ class Sidebar extends StatelessWidget {
       decoration: const BoxDecoration(
         color: Palette.white,
         boxShadow: [
-          BoxShadow(color: Palette.black1, blurRadius: 8, offset: Offset(2, 0)),
+          BoxShadow(color: Palette.black),
         ],
       ),
       child: Column(
