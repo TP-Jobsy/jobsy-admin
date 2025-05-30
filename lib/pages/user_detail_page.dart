@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:jobsy_admin/pages/sidebar.dart';
 import 'package:provider/provider.dart';
 import '../../model/client/client_profile.dart';
@@ -11,6 +12,7 @@ import '../../service/api_client.dart';
 import '../../util/palette.dart';
 import '../../util/routes.dart';
 import '../../widgets/avatar.dart';
+import '../model/error_snackbar.dart';
 import 'admin_layout.dart';
 import 'pagination_bar.dart';
 import 'portfolio_detail_page.dart';
@@ -20,11 +22,7 @@ class UserDetailPage extends StatefulWidget {
   final String userId;
   final String role;
 
-  const UserDetailPage({
-    super.key,
-    required this.userId,
-    required this.role,
-  });
+  const UserDetailPage({super.key, required this.userId, required this.role});
 
   @override
   State<UserDetailPage> createState() => _UserDetailPageState();
@@ -39,56 +37,103 @@ class _UserDetailPageState extends State<UserDetailPage> {
   FreelancerProfile? _freelancer;
   List<Project> _projects = [];
   List<FreelancerPortfolio> _portfolios = [];
+  late final ApiClient _apiClient;
+  late final AdminService _service;
 
   bool _loading = true;
 
   @override
   void initState() {
     super.initState();
-    _loadData();
+    _initAdminService();
   }
 
-  Future<void> _loadData() async {
+  Future<void> _initAdminService() async {
     final auth = context.read<AdminAuthProvider>();
-    final service = AdminService(
+    await auth.ensureLoaded();
+
+    _service = AdminService(
       client: ApiClient(
         baseUrl: Routes.apiBase,
-        getToken: () async {
-          await auth.ensureLoaded();
-          return auth.token;
-        },
-        refreshToken: () async {
-          await auth.refreshTokens();
-        },
+        getToken: () async => auth.token,
+        refreshToken: () async => auth.refreshTokens(),
       ),
     );
 
+    await _loadInfo();
+  }
+
+  Future<void> _loadInfo() async {
+    setState(() => _loading = true);
+    final id = int.parse(widget.userId);
     try {
       if (isClient) {
-        final client = await service.getClientById(int.parse(widget.userId));
-        final projects = await service.getClientProjects(int.parse(widget.userId));
-        setState(() {
-          _client = client;
-          _projects = projects;
-          _status = client.user.isActive ? 'Активен' : 'Заблокирован';
-        });
+        _client = await _service.getClientById(id);
+        _status = _client!.user.isActive ? 'Активен' : 'Заблокирован';
       } else {
-        final freelancer = await service.getFreelancerById(int.parse(widget.userId));
-        final portfolios = await service.getFreelancerPortfolio(int.parse(widget.userId));
-        setState(() {
-          _freelancer = freelancer;
-          _portfolios = portfolios;
-          _status = freelancer.user.isActive ? 'Активен' : 'Заблокирован';
-        });
+        _freelancer = await _service.getFreelancerById(id);
+        _status = _freelancer!.user.isActive ? 'Активен' : 'Заблокирован';
       }
     } catch (e) {
-      debugPrint('Ошибка загрузки: $e');
+      ErrorSnackbar.show(
+        context,
+        type: ErrorType.error,
+        title: 'Ошибка загрузки профиля',
+        message: '$e',
+      );
     } finally {
       setState(() => _loading = false);
     }
   }
 
-  int get totalPages => isClient ? 2 : 3;
+  Future<void> _loadProjects() async {
+    setState(() => _loading = true);
+    final id = int.parse(widget.userId);
+    try {
+      if (isClient) {
+        _projects = await _service.getClientProjects(id);
+      } else {
+        _projects = await _service.getFreelancerProjects(id);
+      }
+    } catch (e) {
+      ErrorSnackbar.show(
+        context,
+        type: ErrorType.error,
+        title: 'Ошибка загрузки проектов',
+        message: '$e',
+      );
+    } finally {
+      setState(() => _loading = false);
+    }
+  }
+
+  Future<void> _loadPortfolios() async {
+    setState(() => _loading = true);
+    final id = int.parse(widget.userId);
+    try {
+      _portfolios = await _service.getFreelancerPortfolio(id);
+    } catch (e) {
+      ErrorSnackbar.show(
+        context,
+        type: ErrorType.error,
+        title: 'Ошибка загрузки портфолио',
+        message: '$e',
+      );
+    } finally {
+      setState(() => _loading = false);
+    }
+  }
+
+  void _onPageChanged(int page) {
+    setState(() => _currentPage = page);
+    if (page == 1) {
+      _loadInfo();
+    } else if (page == 2) {
+      _loadProjects();
+    } else if (page == 3 && !isClient) {
+      _loadPortfolios();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -98,52 +143,139 @@ class _UserDetailPageState extends State<UserDetailPage> {
           ? const Center(child: CircularProgressIndicator())
           : Column(
         children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(50, 30, 50, 24),
-            child: Row(
-              children: [
-                InkWell(
-                  onTap: () => Navigator.of(context).pop(),
-                  borderRadius: BorderRadius.circular(8),
-                  child: const Icon(Icons.arrow_back_ios, size: 20),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: Text(
-                    _getPageTitle(),
-                    style: const TextStyle(
-                        fontSize: 24, fontWeight: FontWeight.w600),
+          if (_currentPage == 1)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(50, 30, 50, 24),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  InkWell(
+                    onTap: () => Navigator.of(context).pop(),
+                    child: SvgPicture.asset(
+                      'assets/icons/ArrowLeft.svg',
+                      width: 20,
+                      height: 20,
+                      color: Palette.black,
+                    ),
                   ),
-                ),
-                DropdownButton<String>(
-                  value: _status,
-                  underline: const SizedBox(),
-                  items: ['Активен', 'Заблокирован']
-                      .map((s) => DropdownMenuItem(
-                      value: s, child: Text(s)))
-                      .toList(),
-                  onChanged: (v) {
-                    if (v != null) setState(() => _status = v);
-                  },
-                ),
-              ],
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 6,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Palette.white,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: _status == 'Активен'
+                            ? Palette.grey3
+                            : Palette.bloodred,
+                      ),
+                    ),
+                    child: DropdownButtonHideUnderline(
+                      child: DropdownButton<String>(
+                        value: _status,
+                        icon: Padding(
+                          padding: const EdgeInsets.only(left: 4),
+                          child: SvgPicture.asset(
+                            'assets/icons/ArrowDown.svg',
+                            width: 15,
+                            height: 15,
+                            color: _status == 'Активен'
+                                ? Palette.grey3
+                                : Palette.bloodred,
+                          ),
+                        ),
+                        items: const [
+                          DropdownMenuItem(
+                            value: 'Активен',
+                            child: Text('Активен'),
+                          ),
+                          DropdownMenuItem(
+                            value: 'Заблокирован',
+                            child: Text('Заблокирован'),
+                          ),
+                        ],
+                        onChanged: (newStatus) async {
+                          if (newStatus == null || newStatus == _status) return;
+                          setState(() => _loading = true);
+                          final id = int.parse(widget.userId);
+                          try {
+                            if (newStatus == 'Заблокирован') {
+                              isClient
+                                  ? await _service.deactivateClient(id)
+                                  : await _service.deactivateFreelancer(id);
+                            } else {
+                              isClient
+                                  ? await _service.activateClient(id)
+                                  : await _service.activateFreelancer(id);
+                            }
+                            setState(() => _status = newStatus);
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(
+                                  newStatus == 'Активен'
+                                      ? 'Пользователь активирован'
+                                      : 'Пользователь заблокирован',
+                                ),
+                              ),
+                            );
+                          } catch (e) {
+                            ErrorSnackbar.show(
+                              context,
+                              type: ErrorType.error,
+                              title: 'Ошибка',
+                              message:'$e',
+                            );
+                          } finally {
+                            setState(() => _loading = false);
+                          }
+                        },
+                        dropdownColor: Palette.white,
+                        style: TextStyle(
+                          fontSize: 13,
+                          color: _status == 'Активен'
+                              ? Palette.black
+                              : Palette.bloodred,
+                        ),
+                        isDense: true,
+                        borderRadius: BorderRadius.circular(12),
+                        elevation: 1,
+                        menuMaxHeight: 120,
+                        itemHeight: 50,
+                        selectedItemBuilder: (BuildContext context) {
+                          return ['Активен', 'Заблокирован'].map((String value) {
+                            return Container(
+                              alignment: Alignment.centerLeft,
+                              padding: const EdgeInsets.symmetric(horizontal: 16),
+                              child: Text(
+                                value,
+                                style: TextStyle(
+                                  fontSize: 15,
+                                  color: value == 'Активен'
+                                      ? Palette.black
+                                      : Palette.bloodred,
+                                ),
+                              ),
+                            );
+                          }).toList();
+                        },
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
-          ),
+
           Expanded(child: _buildContent()),
           PaginationBar(
             currentPage: _currentPage,
-            totalPages: totalPages,
-            onPageChanged: (p) => setState(() => _currentPage = p),
+            totalPages: isClient ? 2 : 3,
+            onPageChanged: _onPageChanged,
           ),
         ],
       ),
     );
-  }
-
-  String _getPageTitle() {
-    if (_currentPage == 1) return 'Основная информация';
-    if (_currentPage == 2) return isClient ? 'Проекты' : 'Проекты фрилансера';
-    return 'Портфолио';
   }
 
   Widget _buildContent() {
@@ -157,39 +289,40 @@ class _UserDetailPageState extends State<UserDetailPage> {
     final user = isClient ? _client?.user : _freelancer?.user;
     if (user == null) return const SizedBox.shrink();
 
-    final map = isClient
-        ? {
-      'Имя': user.firstName,
-      'Фамилия': user.lastName,
-      'Почта': user.email,
-      'Телефон': _client?.basic.phone,
-      'Дата рождения': _client?.basic.dateBirth,
-      'Роль': user.role,
-      'Город': _client?.basic.city,
-      'Страна': _client?.basic.country,
-      'Компания': _client?.basic.companyName,
-      'Должность': _client?.basic.position,
-      'Сфера деятельности': _client?.field.fieldDescription,
-      'Связь': _client?.contact.contactLink,
-      'Рейтинг': _client?.averageRating.toStringAsFixed(1),
-    }
-        : {
-      'Имя': user.firstName,
-      'Фамилия': user.lastName,
-      'Почта': user.email,
-      'Телефон': _freelancer?.basic.phone,
-      'Дата рождения': _freelancer?.basic.dateBirth,
-      'Роль': user.role,
-      'Город': _freelancer?.basic.city,
-      'Страна': _freelancer?.basic.country,
-      'Сфера деятельности': _freelancer?.about.categoryName,
-      'Специализация': _freelancer?.about.specializationName,
-      'Опыт': _freelancer?.about.experienceLevel,
-      'О себе': _freelancer?.about.aboutMe,
-      'Связь': _freelancer?.contact.contactLink,
-      'Рейтинг': _freelancer?.averageRating.toStringAsFixed(1),
-      'Навыки': _freelancer!.skills.map((s) => s.name).join(', '),
-    };
+    final map =
+        isClient
+            ? {
+              'Имя': user.firstName,
+              'Фамилия': user.lastName,
+              'Почта': user.email,
+              'Телефон': _client?.basic.phone,
+              'Дата рождения': _client?.basic.dateBirth,
+              'Роль': user.role,
+              'Город': _client?.basic.city,
+              'Страна': _client?.basic.country,
+              'Компания': _client?.basic.companyName,
+              'Должность': _client?.basic.position,
+              'Сфера деятельности': _client?.field.fieldDescription,
+              'Связь': _client?.contact.contactLink,
+              'Рейтинг': _client?.averageRating.toStringAsFixed(1),
+            }
+            : {
+              'Имя': user.firstName,
+              'Фамилия': user.lastName,
+              'Почта': user.email,
+              'Телефон': _freelancer?.basic.phone,
+              'Дата рождения': _freelancer?.basic.dateBirth,
+              'Роль': user.role,
+              'Город': _freelancer?.basic.city,
+              'Страна': _freelancer?.basic.country,
+              'Сфера деятельности': _freelancer?.about.categoryName,
+              'Специализация': _freelancer?.about.specializationName,
+              'Опыт': _freelancer?.about.experienceLevel,
+              'О себе': _freelancer?.about.aboutMe,
+              'Связь': _freelancer?.contact.contactLink,
+              'Рейтинг': _freelancer?.averageRating.toStringAsFixed(1),
+              'Навыки': _freelancer!.skills.map((s) => s.name).join(', '),
+            };
 
     return SingleChildScrollView(
       padding: const EdgeInsets.fromLTRB(60, 0, 50, 0),
@@ -215,28 +348,67 @@ class _UserDetailPageState extends State<UserDetailPage> {
       return const Center(child: Text('Нет проектов'));
     }
 
-    return ListView.separated(
-      padding: const EdgeInsets.symmetric(horizontal: 60, vertical: 16),
-      itemCount: _projects.length,
-      separatorBuilder: (_, __) => const SizedBox(height: 12),
-      itemBuilder: (_, index) {
-        final project = _projects[index];
-        return InkWell(
-          onTap: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (_) => ProjectDetailPage(projectId: project.id),
+    return SingleChildScrollView(
+      padding: const EdgeInsets.fromLTRB(60, 0, 50, 0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const SizedBox(height: 20),
+          ..._projects.map((p) => Padding(
+            padding: const EdgeInsets.only(bottom: 20),
+            child: InkWell(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => ProjectDetailPage(projectId: p.id),
+                  ),
+                );
+              },
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                decoration: BoxDecoration(
+                  color: Palette.white,
+                  borderRadius: BorderRadius.circular(24),
+                  border: Border.all(color: Palette.grey3),
+                ),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            p.title,
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            'ID: ${p.id} | ${_formatDate(p.createdAt)}',
+                            style: const TextStyle(
+                              fontSize: 14,
+                              color: Palette.grey2,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    SvgPicture.asset(
+                      'assets/icons/ArrowRight.svg',
+                      width: 16,
+                      height: 16,
+                      color: Palette.black,
+                    ),
+                  ],
+                ),
               ),
-            );
-          },
-          child: ListTile(
-            title: Text(project.title),
-            subtitle: Text('ID: ${project.id} | ${_formatDate(project.createdAt)}'),
-            trailing: const Icon(Icons.arrow_forward_ios),
-          ),
-        );
-      },
+            ),
+          )),
+        ],
+      ),
     );
   }
 
@@ -245,28 +417,67 @@ class _UserDetailPageState extends State<UserDetailPage> {
       return const Center(child: Text('Нет портфолио'));
     }
 
-    return ListView.separated(
-      padding: const EdgeInsets.symmetric(horizontal: 60, vertical: 16),
-      itemCount: _portfolios.length,
-      separatorBuilder: (_, __) => const SizedBox(height: 12),
-      itemBuilder: (_, index) {
-        final pf = _portfolios[index];
-        return InkWell(
-          onTap: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (_) => PortfolioDetailPage(portfolioId: pf.id),
+    return SingleChildScrollView(
+      padding: const EdgeInsets.fromLTRB(60, 0, 50, 0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const SizedBox(height: 20),
+          ..._portfolios.map((pf) => Padding(
+            padding: const EdgeInsets.only(bottom: 20),
+            child: InkWell(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => PortfolioDetailPage(portfolioId: pf.id),
+                  ),
+                );
+              },
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                decoration: BoxDecoration(
+                  color: Palette.white,
+                  borderRadius: BorderRadius.circular(24),
+                  border: Border.all(color: Palette.grey3),
+                ),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            pf.title,
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            'ID: ${pf.id} | ${_formatDate(pf.createdAt)}',
+                            style: const TextStyle(
+                              fontSize: 14,
+                              color: Palette.grey2,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    SvgPicture.asset(
+                      'assets/icons/ArrowRight.svg',
+                      width: 16,
+                      height: 16,
+                      color: Palette.black,
+                    ),
+                  ],
+                ),
               ),
-            );
-          },
-          child: ListTile(
-            title: Text(pf.title),
-            subtitle: Text('ID: ${pf.id} | ${_formatDate(pf.createdAt)}'),
-            trailing: const Icon(Icons.arrow_forward_ios),
-          ),
-        );
-      },
+            ),
+          )),
+        ],
+      ),
     );
   }
 
@@ -274,24 +485,24 @@ class _UserDetailPageState extends State<UserDetailPage> {
     return Padding(
       padding: const EdgeInsets.only(bottom: 20),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          SizedBox(width: 150, child: Text('$label:', style: const TextStyle(fontSize: 16))),
+          SizedBox(
+            width: 150,
+            child: Text('$label:', style: const TextStyle(fontSize: 16)),
+          ),
           const SizedBox(width: 16),
           Expanded(
-            child: TextField(
-              readOnly: true,
-              controller: TextEditingController(text: value),
-              decoration: InputDecoration(
-                isDense: true,
-                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(24),
-                  borderSide: BorderSide(color: Palette.grey3),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(24),
-                  borderSide: BorderSide(color: Palette.grey3),
-                ),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+              decoration: BoxDecoration(
+                color: Palette.white,
+                borderRadius: BorderRadius.circular(24),
+                border: Border.all(color: Palette.grey3),
+              ),
+              child: Text(
+                value.isNotEmpty ? value : '—',
+                style: const TextStyle(fontSize: 16),
               ),
             ),
           ),

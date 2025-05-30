@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:provider/provider.dart';
 import 'package:jobsy_admin/pages/sidebar.dart';
+import 'package:provider/provider.dart';
 import 'package:jobsy_admin/pages/user_detail_page.dart';
-
 import '../model/admin_user_row.dart';
 import '../provider/auth_provider.dart';
 import '../service/admin_service.dart';
@@ -26,6 +25,10 @@ class _UsersPageState extends State<UsersPage> {
   bool _loading = true;
   late final AdminService adminService;
 
+  String? _filterRole;
+  DateTime? _filterFrom;
+  DateTime? _filterTo;
+
   @override
   void initState() {
     super.initState();
@@ -45,11 +48,90 @@ class _UsersPageState extends State<UsersPage> {
     _loadUsers();
   }
 
+  Future<_UserFilterResult?> _showUserFilterDialog() {
+    String? role = _filterRole;
+    DateTime? from = _filterFrom, to = _filterTo;
+
+    return showDialog<_UserFilterResult>(
+      context: context,
+      builder:
+          (ctx) => AlertDialog(
+            title: const Text('Фильтры пользователей'),
+            content: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  DropdownButtonFormField<String?>(
+                    value: role,
+                    decoration: const InputDecoration(labelText: 'Роль'),
+                    items: <String?>[null, 'CLIENT', 'FREELANCER']
+                        .map<DropdownMenuItem<String?>>((r) {
+                      final text = r == null ? 'Любая' : r;
+                      return DropdownMenuItem<String?>(
+                        value: r,
+                        child: Text(text),
+                      );
+                    }).toList(),
+                    onChanged: (v) => role = v,
+                  ),
+                  const SizedBox(height: 12),
+                  TextFormField(
+                    decoration: const InputDecoration(
+                      labelText: 'Зарегистрирован с (yyyy-MM-dd)',
+                    ),
+                    initialValue: from?.toIso8601String().substring(0, 10),
+                    onChanged:
+                        (v) => from = v.isEmpty ? null : DateTime.tryParse(v),
+                  ),
+                  const SizedBox(height: 12),
+                  TextFormField(
+                    decoration: const InputDecoration(
+                      labelText: 'По (yyyy-MM-dd)',
+                    ),
+                    initialValue: to?.toIso8601String().substring(0, 10),
+                    onChanged:
+                        (v) => to = v.isEmpty ? null : DateTime.tryParse(v),
+                  ),
+                ],
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.of(
+                    ctx,
+                  ).pop(const _UserFilterResult(null, null, null));
+                },
+                child: const Text('Сбросить'),
+              ),
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.of(ctx).pop(_UserFilterResult(role, from, to));
+                },
+                child: const Text('Применить'),
+              ),
+            ],
+          ),
+    );
+  }
+
+  void _onFilterTap() async {
+    final res = await _showUserFilterDialog();
+    if (res != null) {
+      _filterRole = res.role;
+      _filterFrom = res.from;
+      _filterTo = res.to;
+      _loadUsers();
+    }
+  }
+
   void _loadUsers() async {
     setState(() => _loading = true);
     final response = await adminService.searchUsers(
-      firstName: _searchTerm,
-      lastName: _searchTerm,
+      term: _searchTerm,
+      role: _filterRole,
+      registeredFrom: _filterFrom,
+      registeredTo: _filterTo,
     );
     setState(() {
       _users =
@@ -79,87 +161,29 @@ class _UsersPageState extends State<UsersPage> {
     return AdminLayout(
       currentSection: AdminSection.users,
       onSearch: _onSearch,
+      onFilter: _onFilterTap,
       child:
           _loading
               ? const Center(child: CircularProgressIndicator())
               : AbstractTablePage<AdminUserRow>(
                 futureList: Future.value(_users),
                 columns: const [
+                  DataColumn(label: Text('Id', style: _headerStyle)),
+                  DataColumn(label: Text('Имя', style: _headerStyle)),
+                  DataColumn(label: Text('Фамилия', style: _headerStyle)),
+                  DataColumn(label: Text('Роль', style: _headerStyle)),
+                  DataColumn(label: Text('Статус', style: _headerStyle)),
                   DataColumn(
-                    label: Text(
-                      'Id',
-                      style: TextStyle(
-                        fontWeight: FontWeight.w900,
-                        fontFamily: 'Inter',
-                        fontSize: 16,
-                      ),
-                    ),
+                    label: Text('Дата регистрации', style: _headerStyle),
                   ),
-                  DataColumn(
-                    label: Text(
-                      'Имя',
-                      style: TextStyle(
-                        fontWeight: FontWeight.w900,
-                        fontFamily: 'Inter',
-                        fontSize: 16,
-                      ),
-                    ),
-                  ),
-                  DataColumn(
-                    label: Text(
-                      'Фамилия',
-                      style: TextStyle(
-                        fontWeight: FontWeight.w900,
-                        fontFamily: 'Inter',
-                        fontSize: 16,
-                      ),
-                    ),
-                  ),
-                  DataColumn(
-                    label: Text(
-                      'Роль',
-                      style: TextStyle(
-                        fontWeight: FontWeight.w900,
-                        fontFamily: 'Inter',
-                        fontSize: 16,
-                      ),
-                    ),
-                  ),
-                  DataColumn(
-                    label: Text(
-                      'Статус',
-                      style: TextStyle(
-                        fontWeight: FontWeight.w900,
-                        fontFamily: 'Inter',
-                        fontSize: 16,
-                      ),
-                    ),
-                  ),
-                  DataColumn(
-                    label: Text(
-                      'Дата регистрации',
-                      style: TextStyle(
-                        fontWeight: FontWeight.w900,
-                        fontFamily: 'Inter',
-                        fontSize: 16,
-                      ),
-                    ),
-                  ),
-                  DataColumn(
-                    label: Text(
-                      'Подробнее',
-                      style: TextStyle(
-                        fontWeight: FontWeight.w900,
-                        fontFamily: 'Inter',
-                        fontSize: 16,
-                      ),
-                    ),
-                  ),
+                  DataColumn(label: Text('Подробнее', style: _headerStyle)),
                 ],
                 buildRow: (u) {
                   final d = u.registeredAt;
                   final date =
-                      '${d.day.toString().padLeft(2, '0')}.${d.month.toString().padLeft(2, '0')}.${d.year}';
+                      '${d.day.toString().padLeft(2, '0')}.'
+                      '${d.month.toString().padLeft(2, '0')}.'
+                      '${d.year}';
                   return DataRow(
                     cells: [
                       DataCell(Text(u.id)),
@@ -195,4 +219,17 @@ class _UsersPageState extends State<UsersPage> {
               ),
     );
   }
+}
+
+const TextStyle _headerStyle = TextStyle(
+  fontWeight: FontWeight.w900,
+  fontFamily: 'Inter',
+  fontSize: 16,
+);
+
+class _UserFilterResult {
+  final String? role;
+  final DateTime? from, to;
+
+  const _UserFilterResult(this.role, this.from, this.to);
 }

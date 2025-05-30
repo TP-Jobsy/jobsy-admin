@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:provider/provider.dart';
 import 'package:jobsy_admin/pages/sidebar.dart';
 import '../model/project/project.dart';
@@ -12,7 +13,8 @@ import '../../util/palette.dart';
 class ProjectDetailPage extends StatefulWidget {
   final int projectId;
 
-  const ProjectDetailPage({Key? key, required this.projectId}) : super(key: key);
+  const ProjectDetailPage({Key? key, required this.projectId})
+    : super(key: key);
 
   @override
   State<ProjectDetailPage> createState() => _ProjectDetailPageState();
@@ -55,7 +57,49 @@ class _ProjectDetailPageState extends State<ProjectDetailPage> {
       });
     } catch (e) {
       setState(() => _loading = false);
-      // TODO: Добавьте отображение ошибки
+      // TODO: добавить отображение ошибки
+    }
+  }
+
+  Future<void> _onDeletePressed(Project project) async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder:
+          (_) => AlertDialog(
+            title: const Text('Удалить проект?'),
+            content: Text(
+              'Вы уверены, что хотите удалить проект "${project.title}"?',
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context, false),
+                child: const Text('Отмена'),
+              ),
+              TextButton(
+                onPressed: () => Navigator.pop(context, true),
+                child: const Text('Удалить'),
+              ),
+            ],
+          ),
+    );
+    if (confirm == true) {
+      try {
+        await _adminService.deleteProject(project.id);
+        Navigator.of(context).pop();
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Проект успешно удалён'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      } catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Ошибка при удалении: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
     }
   }
 
@@ -63,76 +107,99 @@ class _ProjectDetailPageState extends State<ProjectDetailPage> {
   Widget build(BuildContext context) {
     return AdminLayout(
       currentSection: AdminSection.projects,
-      child: _loading
-          ? const Center(child: CircularProgressIndicator())
-          : _project == null
-          ? const Center(child: Text('Проект не найден'))
-          : _buildContent(_project!),
-    );
-  }
-
-  Widget _buildContent(Project project) {
-    final assignedName = project.assignedFreelancer != null
-        ? '${project.assignedFreelancer!.basic.firstName} ${project.assignedFreelancer!.basic.lastName}'
-        : '—';
-
-    final skillsStr = project.skills.isNotEmpty
-        ? project.skills.map((s) => s.name).join(', ')
-        : '—';
-
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(60, 40, 60, 20),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              InkWell(
-                onTap: () => Navigator.of(context).pop(),
-                child: const Icon(Icons.arrow_back_ios, size: 20),
-              ),
-              const SizedBox(width: 16),
-              const Text(
-                'Основная информация',
-                style: TextStyle(fontSize: 24, fontWeight: FontWeight.w600),
-              ),
-              const Spacer(),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                decoration: BoxDecoration(
-                  color: Colors.grey.shade100,
-                  borderRadius: BorderRadius.circular(15),
-                  border: Border.all(color: Colors.grey.shade300),
-                ),
-                child: Text(
-                  project.status.name,
-                  style: const TextStyle(fontSize: 14),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 32),
-          _buildField('Заголовок:', project.title),
-          _buildField('Категория:', project.category.name),
-          _buildField('Специализация:', project.specialization.name),
-          _buildField('Описание:', project.description),
-          _buildField('Уровень сложности:', project.complexity.name),
-          _buildField('Срок выполнения:', project.duration.name),
-          _buildField('Сумма:', project.fixedPrice.toStringAsFixed(2)),
-          _buildField('Навыки:', skillsStr),
-          _buildField('Исполнитель:', assignedName),
-          _buildField('Статус проекта:', project.status.name),
-          _buildField('Дата создания:', _formatDate(project.createdAt)),
-        ],
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(60, 40, 60, 20),
+        child:
+            _loading
+                ? const Center(child: CircularProgressIndicator())
+                : _project == null
+                ? const Center(child: Text('Проект не найден'))
+                : _buildContent(_project!),
       ),
     );
   }
 
-  Widget _buildField(String label, String value) {
+  Widget _buildContent(Project project) {
+    final assignedName =
+        project.assignedFreelancer != null
+            ? '${project.assignedFreelancer!.basic.firstName} '
+                '${project.assignedFreelancer!.basic.lastName}'
+            : '—';
+    final skillsStr =
+        project.skills.isNotEmpty
+            ? project.skills.map((s) => s.name).join(', ')
+            : '—';
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            InkWell(
+              onTap: () => Navigator.of(context).pop(),
+              child: SvgPicture.asset(
+                'assets/icons/ArrowLeft.svg',
+                width: 20,
+                height: 20,
+                color: Palette.black,
+              ),
+            ),
+            const SizedBox(width: 16),
+            const Text(
+              'Основная информация',
+              style: TextStyle(fontSize: 24, fontWeight: FontWeight.w600),
+            ),
+            const Spacer(),
+            IconButton(
+              icon: const Icon(Icons.delete, color: Colors.red),
+              tooltip: 'Удалить проект',
+              onPressed: () => _onDeletePressed(project),
+            ),
+          ],
+        ),
+        const SizedBox(height: 32),
+        Expanded(
+          child: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildField('Заголовок:', project.title),
+                _buildField('Категория:', project.category?.name ?? '—'),
+                _buildField(
+                  'Специализация:',
+                  project.specialization?.name ?? '—',
+                ),
+                _buildField('Описание:', project.description, maxLines: null),
+                _buildField(
+                  'Уровень сложности:',
+                  project.complexity?.name ?? '—',
+                ),
+                _buildField('Срок выполнения:', project.duration?.name ?? '—'),
+                _buildField(
+                  'Сумма:',
+                  project.fixedPrice != null
+                      ? project.fixedPrice!.toStringAsFixed(2)
+                      : '—',
+                ),
+                _buildField('Навыки:', skillsStr),
+                _buildField('Исполнитель:', assignedName),
+                _buildField('Статус проекта:', project.status?.name ?? '—'),
+                _buildField('Дата создания:', _formatDate(project.createdAt)),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildField(String label, String value, {int? maxLines = 1}) {
+    final isMultiline = maxLines == null || maxLines > 1;
     return Padding(
       padding: const EdgeInsets.only(bottom: 20),
       child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment:
+            isMultiline ? CrossAxisAlignment.start : CrossAxisAlignment.center,
         children: [
           SizedBox(
             width: 180,
@@ -143,9 +210,13 @@ class _ProjectDetailPageState extends State<ProjectDetailPage> {
             child: TextField(
               readOnly: true,
               controller: TextEditingController(text: value),
+              maxLines: maxLines,
               decoration: InputDecoration(
                 isDense: true,
-                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 14,
+                ),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(24),
                   borderSide: BorderSide(color: Palette.grey3),

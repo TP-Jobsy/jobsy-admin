@@ -5,8 +5,9 @@ import '../widgets/avatar.dart';
 
 class TopBar extends StatelessWidget {
   final void Function(String)? onSearch;
+  final VoidCallback? onFilter;
 
-  const TopBar({super.key, this.onSearch});
+  const TopBar({super.key, this.onSearch, this.onFilter});
 
   @override
   Widget build(BuildContext context) {
@@ -19,11 +20,9 @@ class TopBar extends StatelessWidget {
         child: Row(
           children: [
             Tooltip(
-              message: 'Фильтрация пока не реализована',
+              message: 'Фильтрация',
               child: InkWell(
-                onTap: () {
-                  // TODO: позже добавлю
-                },
+                onTap: onFilter,
                 borderRadius: BorderRadius.circular(8),
                 child: SvgPicture.asset(
                   'assets/icons/Filter.svg',
@@ -49,7 +48,7 @@ class TopBar extends StatelessWidget {
                     boxShadow: const [
                       BoxShadow(
                         color: Palette.black1,
-                        blurRadius: 2,
+                        blurRadius: 1,
                         offset: Offset(0, 1),
                       ),
                     ],

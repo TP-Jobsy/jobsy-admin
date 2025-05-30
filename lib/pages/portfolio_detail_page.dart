@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:provider/provider.dart';
 import '../model/portfolio/portfolio.dart';
 import '../provider/auth_provider.dart';
@@ -12,7 +13,8 @@ import 'sidebar.dart';
 class PortfolioDetailPage extends StatefulWidget {
   final int portfolioId;
 
-  const PortfolioDetailPage({Key? key, required this.portfolioId}) : super(key: key);
+  const PortfolioDetailPage({Key? key, required this.portfolioId})
+    : super(key: key);
 
   @override
   State<PortfolioDetailPage> createState() => _PortfolioDetailPageState();
@@ -45,7 +47,9 @@ class _PortfolioDetailPageState extends State<PortfolioDetailPage> {
     );
 
     try {
-      final portfolio = await _adminService.getPortfolioById(widget.portfolioId);
+      final portfolio = await _adminService.getPortfolioById(
+        widget.portfolioId,
+      );
       setState(() {
         _portfolio = portfolio;
         _loading = false;
@@ -59,18 +63,18 @@ class _PortfolioDetailPageState extends State<PortfolioDetailPage> {
   Widget build(BuildContext context) {
     return AdminLayout(
       currentSection: AdminSection.portfolio,
-      child: _loading
-          ? const Center(child: CircularProgressIndicator())
-          : _portfolio == null
-          ? const Center(child: Text('Портфолио не найдено'))
-          : _buildContent(_portfolio!),
+      child:
+          _loading
+              ? const Center(child: CircularProgressIndicator())
+              : _portfolio == null
+              ? const Center(child: Text('Портфолио не найдено'))
+              : _buildContent(_portfolio!),
     );
   }
 
   Widget _buildContent(FreelancerPortfolio dto) {
-    final skillsStr = dto.skills.isNotEmpty
-        ? dto.skills.map((s) => s.name).join(', ')
-        : '—';
+    final skillsStr =
+        dto.skills.isNotEmpty ? dto.skills.map((s) => s.name).join(', ') : '—';
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(60, 40, 60, 20),
@@ -81,7 +85,12 @@ class _PortfolioDetailPageState extends State<PortfolioDetailPage> {
             children: [
               InkWell(
                 onTap: () => Navigator.of(context).pop(),
-                child: const Icon(Icons.arrow_back_ios, size: 20),
+                child: SvgPicture.asset(
+                  'assets/icons/ArrowLeft.svg',
+                  width: 20,
+                  height: 20,
+                  color: Palette.black,
+                ),
               ),
               const SizedBox(width: 16),
               const Text(
@@ -89,17 +98,52 @@ class _PortfolioDetailPageState extends State<PortfolioDetailPage> {
                 style: TextStyle(fontSize: 24, fontWeight: FontWeight.w600),
               ),
               const Spacer(),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                decoration: BoxDecoration(
-                  color: Colors.grey.shade100,
-                  borderRadius: BorderRadius.circular(15),
-                  border: Border.all(color: Colors.grey.shade300),
-                ),
-                child: Text(
-                  'ID: ${dto.id}',
-                  style: const TextStyle(fontSize: 14),
-                ),
+              IconButton(
+                icon: const Icon(Icons.delete, color: Colors.red),
+                tooltip: 'Удалить портфолио',
+                onPressed: () async {
+                  final confirm = await showDialog<bool>(
+                    context: context,
+                    builder:
+                        (_) => AlertDialog(
+                          title: const Text('Удалить портфолио?'),
+                          content: Text(
+                            'Вы уверены, что хотите удалить портфолио "${dto.title}"?',
+                          ),
+                          actions: [
+                            TextButton(
+                              onPressed: () => Navigator.pop(context, false),
+                              child: const Text('Отмена'),
+                            ),
+                            TextButton(
+                              onPressed: () => Navigator.pop(context, true),
+                              child: const Text('Удалить'),
+                            ),
+                          ],
+                        ),
+                  );
+                  if (confirm == true) {
+                    try {
+                      await _adminService.deletePortfolio(
+                        dto.freelancerId, dto.id,
+                      );
+                      Navigator.of(context).pop();
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Портфолио успешно удалено'),
+                          backgroundColor: Colors.green,
+                        ),
+                      );
+                    } catch (e) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text('Ошибка при удалении: $e'),
+                          backgroundColor: Colors.red,
+                        ),
+                      );
+                    }
+                  }
+                },
               ),
             ],
           ),
@@ -132,7 +176,10 @@ class _PortfolioDetailPageState extends State<PortfolioDetailPage> {
               controller: TextEditingController(text: value),
               decoration: InputDecoration(
                 isDense: true,
-                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 14,
+                ),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(24),
                   borderSide: BorderSide(color: Palette.grey3),
@@ -151,6 +198,6 @@ class _PortfolioDetailPageState extends State<PortfolioDetailPage> {
 
   String _formatDate(DateTime d) =>
       '${d.day.toString().padLeft(2, '0')}.'
-          '${d.month.toString().padLeft(2, '0')}.'
-          '${d.year}';
+      '${d.month.toString().padLeft(2, '0')}.'
+      '${d.year}';
 }
