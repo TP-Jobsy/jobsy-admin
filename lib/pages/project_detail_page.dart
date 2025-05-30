@@ -12,7 +12,8 @@ import '../../util/palette.dart';
 class ProjectDetailPage extends StatefulWidget {
   final int projectId;
 
-  const ProjectDetailPage({Key? key, required this.projectId}) : super(key: key);
+  const ProjectDetailPage({Key? key, required this.projectId})
+    : super(key: key);
 
   @override
   State<ProjectDetailPage> createState() => _ProjectDetailPageState();
@@ -63,22 +64,25 @@ class _ProjectDetailPageState extends State<ProjectDetailPage> {
   Widget build(BuildContext context) {
     return AdminLayout(
       currentSection: AdminSection.projects,
-      child: _loading
-          ? const Center(child: CircularProgressIndicator())
-          : _project == null
-          ? const Center(child: Text('Проект не найден'))
-          : _buildContent(_project!),
+      child:
+          _loading
+              ? const Center(child: CircularProgressIndicator())
+              : _project == null
+              ? const Center(child: Text('Проект не найден'))
+              : _buildContent(_project!),
     );
   }
 
   Widget _buildContent(Project project) {
-    final assignedName = project.assignedFreelancer != null
-        ? '${project.assignedFreelancer!.basic.firstName} ${project.assignedFreelancer!.basic.lastName}'
-        : '—';
+    final assignedName =
+        project.assignedFreelancer != null
+            ? '${project.assignedFreelancer!.basic.firstName} ${project.assignedFreelancer!.basic.lastName}'
+            : '—';
 
-    final skillsStr = project.skills.isNotEmpty
-        ? project.skills.map((s) => s.name).join(', ')
-        : '—';
+    final skillsStr =
+        project.skills.isNotEmpty
+            ? project.skills.map((s) => s.name).join(', ')
+            : '—';
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(60, 40, 60, 20),
@@ -97,17 +101,50 @@ class _ProjectDetailPageState extends State<ProjectDetailPage> {
                 style: TextStyle(fontSize: 24, fontWeight: FontWeight.w600),
               ),
               const Spacer(),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                decoration: BoxDecoration(
-                  color: Colors.grey.shade100,
-                  borderRadius: BorderRadius.circular(15),
-                  border: Border.all(color: Colors.grey.shade300),
-                ),
-                child: Text(
-                  project.status.name,
-                  style: const TextStyle(fontSize: 14),
-                ),
+              IconButton(
+                icon: const Icon(Icons.delete, color: Colors.red),
+                tooltip: 'Удалить проект',
+                onPressed: () async {
+                  final confirm = await showDialog<bool>(
+                    context: context,
+                    builder:
+                        (_) => AlertDialog(
+                          title: const Text('Удалить проект?'),
+                          content: Text(
+                            'Вы уверены, что хотите удалить проект "${project.title}"?',
+                          ),
+                          actions: [
+                            TextButton(
+                              onPressed: () => Navigator.pop(context, false),
+                              child: const Text('Отмена'),
+                            ),
+                            TextButton(
+                              onPressed: () => Navigator.pop(context, true),
+                              child: const Text('Удалить'),
+                            ),
+                          ],
+                        ),
+                  );
+                  if (confirm == true) {
+                    try {
+                      await _adminService.deleteProject(project.id);
+                      Navigator.of(context).pop();
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Проект успешно удалён'),
+                          backgroundColor: Colors.green,
+                        ),
+                      );
+                    } catch (e) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text('Ошибка при удалении: $e'),
+                          backgroundColor: Colors.red,
+                        ),
+                      );
+                    }
+                  }
+                },
               ),
             ],
           ),
@@ -115,11 +152,7 @@ class _ProjectDetailPageState extends State<ProjectDetailPage> {
           _buildField('Заголовок:', project.title),
           _buildField('Категория:', project.category.name),
           _buildField('Специализация:', project.specialization.name),
-          _buildField(
-            'Описание:',
-            project.description,
-            maxLines: null,
-          ),
+          _buildField('Описание:', project.description, maxLines: null),
           _buildField('Уровень сложности:', project.complexity.name),
           _buildField('Срок выполнения:', project.duration.name),
           _buildField('Сумма:', project.fixedPrice.toStringAsFixed(2)),
@@ -132,15 +165,14 @@ class _ProjectDetailPageState extends State<ProjectDetailPage> {
     );
   }
 
-  Widget _buildField(
-      String label,
-      String value, {
-        int? maxLines = 1,
-      }) {
+  Widget _buildField(String label, String value, {int? maxLines = 1}) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 20),
       child: Row(
-        crossAxisAlignment: maxLines! > 1 ? CrossAxisAlignment.start : CrossAxisAlignment.center,
+        crossAxisAlignment:
+            maxLines! > 1
+                ? CrossAxisAlignment.start
+                : CrossAxisAlignment.center,
         children: [
           SizedBox(
             width: 180,
@@ -154,7 +186,10 @@ class _ProjectDetailPageState extends State<ProjectDetailPage> {
               maxLines: maxLines,
               decoration: InputDecoration(
                 isDense: true,
-                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 14,
+                ),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(24),
                   borderSide: BorderSide(color: Palette.grey3),
