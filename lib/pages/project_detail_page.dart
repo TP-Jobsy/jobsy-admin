@@ -115,7 +115,11 @@ class _ProjectDetailPageState extends State<ProjectDetailPage> {
           _buildField('Заголовок:', project.title),
           _buildField('Категория:', project.category.name),
           _buildField('Специализация:', project.specialization.name),
-          _buildField('Описание:', project.description),
+          _buildField(
+            'Описание:',
+            project.description,
+            maxLines: null,
+          ),
           _buildField('Уровень сложности:', project.complexity.name),
           _buildField('Срок выполнения:', project.duration.name),
           _buildField('Сумма:', project.fixedPrice.toStringAsFixed(2)),
@@ -128,11 +132,15 @@ class _ProjectDetailPageState extends State<ProjectDetailPage> {
     );
   }
 
-  Widget _buildField(String label, String value) {
+  Widget _buildField(
+      String label,
+      String value, {
+        int? maxLines = 1,
+      }) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 20),
       child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: maxLines! > 1 ? CrossAxisAlignment.start : CrossAxisAlignment.center,
         children: [
           SizedBox(
             width: 180,
@@ -143,6 +151,7 @@ class _ProjectDetailPageState extends State<ProjectDetailPage> {
             child: TextField(
               readOnly: true,
               controller: TextEditingController(text: value),
+              maxLines: maxLines,
               decoration: InputDecoration(
                 isDense: true,
                 contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
