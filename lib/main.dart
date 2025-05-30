@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:jobsy_admin/pages/login_page.dart';
+import 'package:jobsy_admin/pages/portfolio_detail_page.dart';
 import 'package:jobsy_admin/pages/portfolio_page.dart';
+import 'package:jobsy_admin/pages/project_detail_page.dart';
 import 'package:jobsy_admin/pages/projects_page.dart';
 import 'package:jobsy_admin/pages/user_detail_page.dart';
 import 'package:jobsy_admin/pages/users_screen.dart';
@@ -52,6 +54,14 @@ class MyApp extends StatelessWidget {
         Routes.users: (_) => UsersPage(),
         Routes.projects: (_) => ProjectsPage(),
         Routes.portfolio: (_) => PortfoliosPage(),
+        Routes.projectDetail: (ctx) {
+          final id = ModalRoute.of(ctx)!.settings.arguments as int;
+          return ProjectDetailPage(projectId: id);
+        },
+        Routes.portfolioDetail: (ctx) {
+          final id = ModalRoute.of(ctx)!.settings.arguments as int;
+          return PortfolioDetailPage(portfolioId: id);
+        },
       },
       onGenerateRoute: (settings) {
         switch (settings.name) {
