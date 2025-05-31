@@ -99,7 +99,12 @@ class _PortfolioDetailPageState extends State<PortfolioDetailPage> {
               ),
               const Spacer(),
               IconButton(
-                icon: const Icon(Icons.delete, color: Colors.red),
+                icon:  SvgPicture.asset(
+                  'assets/icons/trash.svg',
+                  width: 25,
+                  height: 25,
+                  color: Palette.red,
+                ),
                 tooltip: 'Удалить портфолио',
                 onPressed: () async {
                   final confirm = await showDialog<bool>(
@@ -131,14 +136,14 @@ class _PortfolioDetailPageState extends State<PortfolioDetailPage> {
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(
                           content: Text('Портфолио успешно удалено'),
-                          backgroundColor: Colors.green,
+                          backgroundColor: Palette.green,
                         ),
                       );
                     } catch (e) {
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
                           content: Text('Ошибка при удалении: $e'),
-                          backgroundColor: Colors.red,
+                          backgroundColor: Palette.red,
                         ),
                       );
                     }
