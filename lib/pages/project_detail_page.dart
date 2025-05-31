@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:provider/provider.dart';
 import 'package:jobsy_admin/pages/sidebar.dart';
+import '../model/error_snackbar.dart';
 import '../model/project/project.dart';
 import '../provider/auth_provider.dart';
 import '../service/admin_service.dart';
@@ -57,7 +58,12 @@ class _ProjectDetailPageState extends State<ProjectDetailPage> {
       });
     } catch (e) {
       setState(() => _loading = false);
-      // TODO: добавить отображение ошибки
+      ErrorSnackbar.show(
+        context,
+        type: ErrorType.error,
+        title: 'Ошибка',
+        message: e.toString(),
+      );
     }
   }
 
@@ -89,14 +95,14 @@ class _ProjectDetailPageState extends State<ProjectDetailPage> {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Проект успешно удалён'),
-            backgroundColor: Colors.green,
+            backgroundColor: Palette.green,
           ),
         );
       } catch (e) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Ошибка при удалении: $e'),
-            backgroundColor: Colors.red,
+            backgroundColor: Palette.red,
           ),
         );
       }
@@ -151,7 +157,12 @@ class _ProjectDetailPageState extends State<ProjectDetailPage> {
             ),
             const Spacer(),
             IconButton(
-              icon: const Icon(Icons.delete, color: Colors.red),
+              icon:  SvgPicture.asset(
+                'assets/icons/trash.svg',
+                width: 25,
+                height: 25,
+                color: Palette.red,
+              ),
               tooltip: 'Удалить проект',
               onPressed: () => _onDeletePressed(project),
             ),
