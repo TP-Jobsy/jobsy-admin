@@ -8,17 +8,18 @@ class AvatarService {
   final http.Client _http;
 
   AvatarService({String? baseUrl, http.Client? httpClient})
-      : _baseUrl = baseUrl ?? Routes.apiBase,
-        _http = httpClient ?? http.Client();
+    : _baseUrl = baseUrl ?? Routes.apiBase,
+      _http = httpClient ?? http.Client();
 
   Future<String> uploadClientAvatar({
     required String token,
     required File file,
   }) async {
     final uri = Uri.parse('$_baseUrl/profile/client/avatar');
-    final request = http.MultipartRequest('POST', uri)
-      ..headers['Authorization'] = 'Bearer $token'
-      ..files.add(await http.MultipartFile.fromPath('file', file.path));
+    final request =
+        http.MultipartRequest('POST', uri)
+          ..headers['Authorization'] = 'Bearer $token'
+          ..files.add(await http.MultipartFile.fromPath('file', file.path));
     final streamed = await request.send();
     final res = await http.Response.fromStream(streamed);
     if (res.statusCode != 200) {
@@ -32,9 +33,10 @@ class AvatarService {
     required File file,
   }) async {
     final uri = Uri.parse('$_baseUrl/profile/freelancer/avatar');
-    final request = http.MultipartRequest('POST', uri)
-      ..headers['Authorization'] = 'Bearer $token'
-      ..files.add(await http.MultipartFile.fromPath('file', file.path));
+    final request =
+        http.MultipartRequest('POST', uri)
+          ..headers['Authorization'] = 'Bearer $token'
+          ..files.add(await http.MultipartFile.fromPath('file', file.path));
     final streamed = await request.send();
     final res = await http.Response.fromStream(streamed);
     if (res.statusCode != 200) {
