@@ -13,6 +13,7 @@ class AdminAuthProvider with ChangeNotifier {
   final FlutterSecureStorage _secureStorage = const FlutterSecureStorage();
   late final AdminAuthService _service;
   late final ApiClient _apiClient;
+
   bool get isLoaded => _isLoaded;
 
   bool _isLoaded = false;
