@@ -15,7 +15,6 @@ import 'admin_layout.dart';
 class ProjectsPage extends StatefulWidget {
   const ProjectsPage({super.key});
 
-
   @override
   State<ProjectsPage> createState() => _ProjectsPageState();
 }
@@ -25,6 +24,10 @@ class _ProjectsPageState extends State<ProjectsPage> {
   String? _searchTerm;
   bool _loading = true;
   late final AdminService adminService;
+
+  String? _filterStatus;
+  DateTime? _filterFrom;
+  DateTime? _filterTo;
 
   @override
   void initState() {
@@ -45,9 +48,84 @@ class _ProjectsPageState extends State<ProjectsPage> {
     _loadProjects();
   }
 
+  Future<_FilterResult?> _showProjectFilter() {
+    String? status = _filterStatus;
+    DateTime? from = _filterFrom;
+    DateTime? to = _filterTo;
+
+    return showDialog<_FilterResult>(
+      context: context,
+      builder:
+          (ctx) => AlertDialog(
+            title: Text('Фильтры проектов'),
+            content: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  DropdownButtonFormField<String>(
+                    value: status,
+                    decoration: InputDecoration(labelText: 'Статус'),
+                    items:
+                        ['OPEN', 'IN_PROGRESS', 'COMPLETED', 'DRAFT']
+                            .map(
+                              (s) => DropdownMenuItem(child: Text(s), value: s),
+                            )
+                            .toList(),
+                    onChanged: (v) => status = v,
+                  ),
+                  SizedBox(height: 12),
+                  TextFormField(
+                    decoration: InputDecoration(labelText: 'С (yyyy-MM-dd)'),
+                    initialValue: from?.toIso8601String().substring(0, 10),
+                    onChanged:
+                        (v) => from = v.isEmpty ? null : DateTime.tryParse(v),
+                  ),
+                  SizedBox(height: 8),
+                  TextFormField(
+                    decoration: InputDecoration(labelText: 'По (yyyy-MM-dd)'),
+                    initialValue: to?.toIso8601String().substring(0, 10),
+                    onChanged:
+                        (v) => to = v.isEmpty ? null : DateTime.tryParse(v),
+                  ),
+                ],
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.of(ctx).pop(_FilterResult(null, null, null));
+                },
+                child: Text('Сбросить'),
+              ),
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.of(ctx).pop(_FilterResult(status, from, to));
+                },
+                child: Text('Применить'),
+              ),
+            ],
+          ),
+    );
+  }
+
+  void _onFilterTap() async {
+    final res = await _showProjectFilter();
+    if (res != null) {
+      _filterStatus = res.status;
+      _filterFrom = res.from;
+      _filterTo = res.to;
+      _loadProjects();
+    }
+  }
+
   void _loadProjects() async {
     setState(() => _loading = true);
-    final response = await adminService.searchProjects(term: _searchTerm);
+    final response = await adminService.searchProjects(
+      term: _searchTerm,
+      status: _filterStatus,
+      createdFrom: _filterFrom,
+      createdTo: _filterTo,
+    );
     setState(() {
       _projects = response.content;
       _loading = false;
@@ -63,6 +141,7 @@ class _ProjectsPageState extends State<ProjectsPage> {
   Widget build(BuildContext context) {
     return AdminLayout(
       currentSection: AdminSection.projects,
+      onFilter: _onFilterTap,
       onSearch: _onSearch,
       child:
           _loading
@@ -120,3 +199,10 @@ const TextStyle _headerStyle = TextStyle(
   fontFamily: 'Inter',
   fontSize: 16,
 );
+
+class _FilterResult {
+  final String? status;
+  final DateTime? from, to;
+
+  _FilterResult(this.status, this.from, this.to);
+}

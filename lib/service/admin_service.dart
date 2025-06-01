@@ -135,20 +135,19 @@ class AdminService {
   }
 
   Future<PageResponse<User>> searchUsers({
-    String? email,
-    String? firstName,
-    String? lastName,
-    String? phone,
+    String? term,
     String? role,
+    DateTime? registeredFrom,
+    DateTime? registeredTo,
     int page = 0,
     int size = 20,
   }) async {
     final query = {
-      if (email != null) 'email': email,
-      if (firstName != null) 'firstName': firstName,
-      if (lastName != null) 'lastName': lastName,
-      if (phone != null) 'phone': phone,
+      if (term != null && term.isNotEmpty) 'term': term,
       if (role != null) 'role': role,
+      if (registeredFrom != null)
+        'registeredFrom': registeredFrom.toIso8601String(),
+      if (registeredTo != null) 'registeredTo': registeredTo.toIso8601String(),
       'page': '$page',
       'size': '$size',
     };
@@ -165,14 +164,16 @@ class AdminService {
   Future<PageResponse<ProjectAdminListItem>> searchProjects({
     String? term,
     String? status,
-    String? clientName,
+    DateTime? createdFrom,
+    DateTime? createdTo,
     int page = 0,
     int size = 20,
   }) async {
-    final query = {
-      if (term != null) 'term': term,
-      if (status != null) 'status': status,
-      if (clientName != null) 'clientName': clientName,
+    final query = <String, String>{
+      if (term != null && term.isNotEmpty) 'term': term,
+      if (status != null && status.isNotEmpty) 'status': status,
+      if (createdFrom != null) 'createdFrom': createdFrom.toIso8601String(),
+      if (createdTo != null) 'createdTo': createdTo.toIso8601String(),
       'page': '$page',
       'size': '$size',
     };
@@ -180,7 +181,7 @@ class AdminService {
     final json = await _api.get<Map<String, dynamic>>(
       '/admin/projects/search',
       queryParameters: query,
-      decoder: (data) => data,
+      decoder: (d) => d,
     );
 
     return PageResponse<ProjectAdminListItem>.fromJson(
@@ -191,13 +192,15 @@ class AdminService {
 
   Future<PageResponse<PortfolioAdminListItem>> searchPortfolios({
     String? term,
-    String? freelancerName,
+    DateTime? createdFrom,
+    DateTime? createdTo,
     int page = 0,
     int size = 20,
   }) async {
-    final query = {
-      if (term != null) 'term': term,
-      if (freelancerName != null) 'freelancerName': freelancerName,
+    final query = <String, String>{
+      if (term != null && term.isNotEmpty) 'term': term,
+      if (createdFrom != null) 'createdFrom': createdFrom.toIso8601String(),
+      if (createdTo != null) 'createdTo': createdTo.toIso8601String(),
       'page': '$page',
       'size': '$size',
     };
@@ -205,7 +208,7 @@ class AdminService {
     final json = await _api.get<Map<String, dynamic>>(
       '/admin/portfolios/search',
       queryParameters: query,
-      decoder: (data) => data,
+      decoder: (d) => d,
     );
 
     return PageResponse<PortfolioAdminListItem>.fromJson(
@@ -241,9 +244,6 @@ class AdminService {
       '/admin/freelancers/$freelancerId/projects',
       decoder: (data) => data,
     );
-    return json!
-        .cast<Map<String, dynamic>>()
-        .map(Project.fromJson)
-        .toList();
+    return json!.cast<Map<String, dynamic>>().map(Project.fromJson).toList();
   }
 }
