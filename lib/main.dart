@@ -17,10 +17,7 @@ void main() async {
   await authProvider.ensureLoaded();
 
   runApp(
-    ChangeNotifierProvider.value(
-      value: authProvider,
-      child: const MyApp(),
-    ),
+    ChangeNotifierProvider.value(value: authProvider, child: const MyApp()),
   );
 }
 
@@ -33,9 +30,7 @@ class MyApp extends StatelessWidget {
     final auth = context.watch<AdminAuthProvider>();
     if (!auth.isLoaded) {
       return const MaterialApp(
-        home: Scaffold(
-          body: Center(child: CircularProgressIndicator()),
-        ),
+        home: Scaffold(body: Center(child: CircularProgressIndicator())),
       );
     }
     return MaterialApp(
@@ -68,17 +63,16 @@ class MyApp extends StatelessWidget {
           case Routes.userDetail:
             final args = settings.arguments as Map<String, String>;
             return MaterialPageRoute(
-              builder: (_) => UserDetailPage(
-                userId: args['id']!,
-                role:   args['role']!,
-              ),
+              builder:
+                  (_) =>
+                      UserDetailPage(userId: args['id']!, role: args['role']!),
             );
-
         }
         return MaterialPageRoute(
-          builder: (_) => const Scaffold(
-            body: Center(child: Text('Страница не найдена')),
-          ),
+          builder:
+              (_) => const Scaffold(
+                body: Center(child: Text('Страница не найдена')),
+              ),
         );
       },
     );
