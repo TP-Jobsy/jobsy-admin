@@ -72,19 +72,13 @@ class Sidebar extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(19, 20, 19, 25),
       decoration: const BoxDecoration(
         color: Palette.white,
-        boxShadow: [
-          BoxShadow(color: Palette.black),
-        ],
+        boxShadow: [BoxShadow(color: Palette.black)],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Center(
-            child: SvgPicture.asset(
-              'assets/logo.svg',
-              width: 180,
-              height: 70,
-            ),
+            child: SvgPicture.asset('assets/logo.svg', width: 180, height: 70),
           ),
           const SizedBox(height: 32),
           navButton(
@@ -98,19 +92,20 @@ class Sidebar extends StatelessWidget {
             label: 'Проекты',
             iconAsset: 'assets/icons/projects.svg',
             active: current == AdminSection.projects,
-              onTap: () {
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(builder: (_) => const ProjectsPage()),
-                );
-              }
+            onTap: () {
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (_) => const ProjectsPage()),
+              );
+            },
           ),
           const SizedBox(height: 30),
           navButton(
             label: 'Портфолио',
             iconAsset: 'assets/icons/portfolio.svg',
             active: current == AdminSection.portfolio,
-            onTap: () => Navigator.pushReplacementNamed(context, Routes.portfolio),
+            onTap:
+                () => Navigator.pushReplacementNamed(context, Routes.portfolio),
           ),
           const Spacer(),
           navButton(
@@ -119,7 +114,10 @@ class Sidebar extends StatelessWidget {
             textColor: Palette.red,
             iconColor: Palette.red,
             onTap: () async {
-              final auth = Provider.of<AdminAuthProvider>(context, listen: false);
+              final auth = Provider.of<AdminAuthProvider>(
+                context,
+                listen: false,
+              );
               await auth.logout();
               Navigator.pushReplacementNamed(context, Routes.login);
             },

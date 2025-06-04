@@ -139,142 +139,156 @@ class _UserDetailPageState extends State<UserDetailPage> {
   Widget build(BuildContext context) {
     return AdminLayout(
       currentSection: AdminSection.users,
-      child: _loading
-          ? const Center(child: CircularProgressIndicator())
-          : Column(
-        children: [
-          if (_currentPage == 1)
-            Padding(
-              padding: const EdgeInsets.fromLTRB(50, 30, 50, 24),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      child:
+          _loading
+              ? const Center(child: CircularProgressIndicator())
+              : Column(
                 children: [
-                  InkWell(
-                    onTap: () => Navigator.of(context).pop(),
-                    child: SvgPicture.asset(
-                      'assets/icons/ArrowLeft.svg',
-                      width: 20,
-                      height: 20,
-                      color: Palette.black,
-                    ),
-                  ),
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 10,
-                      vertical: 6,
-                    ),
-                    decoration: BoxDecoration(
-                      color: Palette.white,
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(
-                        color: _status == 'Активен'
-                            ? Palette.grey3
-                            : Palette.bloodred,
-                      ),
-                    ),
-                    child: DropdownButtonHideUnderline(
-                      child: DropdownButton<String>(
-                        value: _status,
-                        icon: Padding(
-                          padding: const EdgeInsets.only(left: 4),
-                          child: SvgPicture.asset(
-                            'assets/icons/ArrowDown.svg',
-                            width: 15,
-                            height: 15,
-                            color: _status == 'Активен'
-                                ? Palette.grey3
-                                : Palette.bloodred,
+                  if (_currentPage == 1)
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(50, 30, 50, 24),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          InkWell(
+                            onTap: () => Navigator.of(context).pop(),
+                            child: SvgPicture.asset(
+                              'assets/icons/ArrowLeft.svg',
+                              width: 20,
+                              height: 20,
+                              color: Palette.black,
+                            ),
                           ),
-                        ),
-                        items: const [
-                          DropdownMenuItem(
-                            value: 'Активен',
-                            child: Text('Активен'),
-                          ),
-                          DropdownMenuItem(
-                            value: 'Заблокирован',
-                            child: Text('Заблокирован'),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 10,
+                              vertical: 6,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Palette.white,
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(
+                                color:
+                                    _status == 'Активен'
+                                        ? Palette.grey3
+                                        : Palette.bloodred,
+                              ),
+                            ),
+                            child: DropdownButtonHideUnderline(
+                              child: DropdownButton<String>(
+                                value: _status,
+                                icon: Padding(
+                                  padding: const EdgeInsets.only(left: 4),
+                                  child: SvgPicture.asset(
+                                    'assets/icons/ArrowDown.svg',
+                                    width: 15,
+                                    height: 15,
+                                    color:
+                                        _status == 'Активен'
+                                            ? Palette.grey3
+                                            : Palette.bloodred,
+                                  ),
+                                ),
+                                items: const [
+                                  DropdownMenuItem(
+                                    value: 'Активен',
+                                    child: Text('Активен'),
+                                  ),
+                                  DropdownMenuItem(
+                                    value: 'Заблокирован',
+                                    child: Text('Заблокирован'),
+                                  ),
+                                ],
+                                onChanged: (newStatus) async {
+                                  if (newStatus == null || newStatus == _status)
+                                    return;
+                                  setState(() => _loading = true);
+                                  final id = int.parse(widget.userId);
+                                  try {
+                                    if (newStatus == 'Заблокирован') {
+                                      isClient
+                                          ? await _service.deactivateClient(id)
+                                          : await _service.deactivateFreelancer(
+                                            id,
+                                          );
+                                    } else {
+                                      isClient
+                                          ? await _service.activateClient(id)
+                                          : await _service.activateFreelancer(
+                                            id,
+                                          );
+                                    }
+                                    setState(() => _status = newStatus);
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Text(
+                                          newStatus == 'Активен'
+                                              ? 'Пользователь активирован'
+                                              : 'Пользователь заблокирован',
+                                        ),
+                                      ),
+                                    );
+                                  } catch (e) {
+                                    ErrorSnackbar.show(
+                                      context,
+                                      type: ErrorType.error,
+                                      title: 'Ошибка',
+                                      message: '$e',
+                                    );
+                                  } finally {
+                                    setState(() => _loading = false);
+                                  }
+                                },
+                                dropdownColor: Palette.white,
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  color:
+                                      _status == 'Активен'
+                                          ? Palette.black
+                                          : Palette.bloodred,
+                                ),
+                                isDense: true,
+                                borderRadius: BorderRadius.circular(12),
+                                elevation: 1,
+                                menuMaxHeight: 120,
+                                itemHeight: 50,
+                                selectedItemBuilder: (BuildContext context) {
+                                  return ['Активен', 'Заблокирован'].map((
+                                    String value,
+                                  ) {
+                                    return Container(
+                                      alignment: Alignment.centerLeft,
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 16,
+                                      ),
+                                      child: Text(
+                                        value,
+                                        style: TextStyle(
+                                          fontSize: 15,
+                                          color:
+                                              value == 'Активен'
+                                                  ? Palette.black
+                                                  : Palette.bloodred,
+                                        ),
+                                      ),
+                                    );
+                                  }).toList();
+                                },
+                              ),
+                            ),
                           ),
                         ],
-                        onChanged: (newStatus) async {
-                          if (newStatus == null || newStatus == _status) return;
-                          setState(() => _loading = true);
-                          final id = int.parse(widget.userId);
-                          try {
-                            if (newStatus == 'Заблокирован') {
-                              isClient
-                                  ? await _service.deactivateClient(id)
-                                  : await _service.deactivateFreelancer(id);
-                            } else {
-                              isClient
-                                  ? await _service.activateClient(id)
-                                  : await _service.activateFreelancer(id);
-                            }
-                            setState(() => _status = newStatus);
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text(
-                                  newStatus == 'Активен'
-                                      ? 'Пользователь активирован'
-                                      : 'Пользователь заблокирован',
-                                ),
-                              ),
-                            );
-                          } catch (e) {
-                            ErrorSnackbar.show(
-                              context,
-                              type: ErrorType.error,
-                              title: 'Ошибка',
-                              message:'$e',
-                            );
-                          } finally {
-                            setState(() => _loading = false);
-                          }
-                        },
-                        dropdownColor: Palette.white,
-                        style: TextStyle(
-                          fontSize: 13,
-                          color: _status == 'Активен'
-                              ? Palette.black
-                              : Palette.bloodred,
-                        ),
-                        isDense: true,
-                        borderRadius: BorderRadius.circular(12),
-                        elevation: 1,
-                        menuMaxHeight: 120,
-                        itemHeight: 50,
-                        selectedItemBuilder: (BuildContext context) {
-                          return ['Активен', 'Заблокирован'].map((String value) {
-                            return Container(
-                              alignment: Alignment.centerLeft,
-                              padding: const EdgeInsets.symmetric(horizontal: 16),
-                              child: Text(
-                                value,
-                                style: TextStyle(
-                                  fontSize: 15,
-                                  color: value == 'Активен'
-                                      ? Palette.black
-                                      : Palette.bloodred,
-                                ),
-                              ),
-                            );
-                          }).toList();
-                        },
                       ),
                     ),
+
+                  Expanded(child: _buildContent()),
+                  PaginationBar(
+                    currentPage: _currentPage,
+                    totalPages: isClient ? 2 : 3,
+                    onPageChanged: _onPageChanged,
                   ),
                 ],
               ),
-            ),
-
-          Expanded(child: _buildContent()),
-          PaginationBar(
-            currentPage: _currentPage,
-            totalPages: isClient ? 2 : 3,
-            onPageChanged: _onPageChanged,
-          ),
-        ],
-      ),
     );
   }
 
@@ -354,59 +368,64 @@ class _UserDetailPageState extends State<UserDetailPage> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const SizedBox(height: 20),
-          ..._projects.map((p) => Padding(
-            padding: const EdgeInsets.only(bottom: 20),
-            child: InkWell(
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => ProjectDetailPage(projectId: p.id),
+          ..._projects.map(
+            (p) => Padding(
+              padding: const EdgeInsets.only(bottom: 20),
+              child: InkWell(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => ProjectDetailPage(projectId: p.id),
+                    ),
+                  );
+                },
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 14,
                   ),
-                );
-              },
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                decoration: BoxDecoration(
-                  color: Palette.white,
-                  borderRadius: BorderRadius.circular(24),
-                  border: Border.all(color: Palette.grey3),
-                ),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            p.title,
-                            style: const TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
+                  decoration: BoxDecoration(
+                    color: Palette.white,
+                    borderRadius: BorderRadius.circular(24),
+                    border: Border.all(color: Palette.grey3),
+                  ),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              p.title,
+                              style: const TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            'ID: ${p.id} | ${_formatDate(p.createdAt)}',
-                            style: const TextStyle(
-                              fontSize: 14,
-                              color: Palette.grey2,
+                            const SizedBox(height: 8),
+                            Text(
+                              'ID: ${p.id} | ${_formatDate(p.createdAt)}',
+                              style: const TextStyle(
+                                fontSize: 14,
+                                color: Palette.grey2,
+                              ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
-                    ),
-                    SvgPicture.asset(
-                      'assets/icons/ArrowRight.svg',
-                      width: 16,
-                      height: 16,
-                      color: Palette.black,
-                    ),
-                  ],
+                      SvgPicture.asset(
+                        'assets/icons/ArrowRight.svg',
+                        width: 16,
+                        height: 16,
+                        color: Palette.black,
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
-          )),
+          ),
         ],
       ),
     );
@@ -423,59 +442,64 @@ class _UserDetailPageState extends State<UserDetailPage> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const SizedBox(height: 20),
-          ..._portfolios.map((pf) => Padding(
-            padding: const EdgeInsets.only(bottom: 20),
-            child: InkWell(
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => PortfolioDetailPage(portfolioId: pf.id),
+          ..._portfolios.map(
+            (pf) => Padding(
+              padding: const EdgeInsets.only(bottom: 20),
+              child: InkWell(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => PortfolioDetailPage(portfolioId: pf.id),
+                    ),
+                  );
+                },
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 14,
                   ),
-                );
-              },
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                decoration: BoxDecoration(
-                  color: Palette.white,
-                  borderRadius: BorderRadius.circular(24),
-                  border: Border.all(color: Palette.grey3),
-                ),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            pf.title,
-                            style: const TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
+                  decoration: BoxDecoration(
+                    color: Palette.white,
+                    borderRadius: BorderRadius.circular(24),
+                    border: Border.all(color: Palette.grey3),
+                  ),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              pf.title,
+                              style: const TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            'ID: ${pf.id} | ${_formatDate(pf.createdAt)}',
-                            style: const TextStyle(
-                              fontSize: 14,
-                              color: Palette.grey2,
+                            const SizedBox(height: 8),
+                            Text(
+                              'ID: ${pf.id} | ${_formatDate(pf.createdAt)}',
+                              style: const TextStyle(
+                                fontSize: 14,
+                                color: Palette.grey2,
+                              ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
-                    ),
-                    SvgPicture.asset(
-                      'assets/icons/ArrowRight.svg',
-                      width: 16,
-                      height: 16,
-                      color: Palette.black,
-                    ),
-                  ],
+                      SvgPicture.asset(
+                        'assets/icons/ArrowRight.svg',
+                        width: 16,
+                        height: 16,
+                        color: Palette.black,
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
-          )),
+          ),
         ],
       ),
     );

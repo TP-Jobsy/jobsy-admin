@@ -38,17 +38,15 @@ class _AdminLoginPageState extends State<AdminLoginPage> {
     setState(() => _loading = true);
     try {
       await context.read<AdminAuthProvider>().requestCode(email);
-          ErrorSnackbar.show(
-            context,
-            type: ErrorType.success,
-            title: 'Успех',
-            message: 'Код отправлен',
+      ErrorSnackbar.show(
+        context,
+        type: ErrorType.success,
+        title: 'Успех',
+        message: 'Код отправлен',
       );
-      Navigator.of(context).push(
-        MaterialPageRoute(
-          builder: (_) => ConfirmScreen(email: email),
-        ),
-      );
+      Navigator.of(
+        context,
+      ).push(MaterialPageRoute(builder: (_) => ConfirmScreen(email: email)));
     } catch (e) {
       ErrorSnackbar.show(
         context,
@@ -67,7 +65,8 @@ class _AdminLoginPageState extends State<AdminLoginPage> {
       backgroundColor: Palette.white,
       body: LayoutBuilder(
         builder: (ctx, constraints) {
-          final maxWidth = constraints.maxWidth > 400 ? 400.0 : constraints.maxWidth;
+          final maxWidth =
+              constraints.maxWidth > 400 ? 400.0 : constraints.maxWidth;
           return SafeArea(
             child: Center(
               child: ConstrainedBox(
@@ -75,11 +74,30 @@ class _AdminLoginPageState extends State<AdminLoginPage> {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    SvgPicture.asset('assets/logo.svg', width: 234, height: 130),
+                    SvgPicture.asset(
+                      'assets/logo.svg',
+                      width: 234,
+                      height: 130,
+                    ),
                     const SizedBox(height: 32),
-                    const Text('Администратор', style: TextStyle(fontSize: 33, fontWeight: FontWeight.w500, fontFamily: 'Inter', color: Palette.black)),
+                    const Text(
+                      'Администратор',
+                      style: TextStyle(
+                        fontSize: 33,
+                        fontWeight: FontWeight.w500,
+                        fontFamily: 'Inter',
+                        color: Palette.black,
+                      ),
+                    ),
                     const SizedBox(height: 8),
-                    const Text('Введите почту, чтобы войти!', style: TextStyle(fontSize: 23, fontFamily: 'Inter', color: Palette.grey1)),
+                    const Text(
+                      'Введите почту, чтобы войти!',
+                      style: TextStyle(
+                        fontSize: 23,
+                        fontFamily: 'Inter',
+                        color: Palette.grey1,
+                      ),
+                    ),
                     const SizedBox(height: 32),
                     SizedBox(
                       height: 63,
@@ -89,13 +107,30 @@ class _AdminLoginPageState extends State<AdminLoginPage> {
                         decoration: InputDecoration(
                           hintText: 'Почта',
                           hintStyle: const TextStyle(color: Palette.grey1),
-                          contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 20,
+                            vertical: 20,
+                          ),
                           suffixIcon: Padding(
                             padding: const EdgeInsets.only(right: 20),
-                            child: SvgPicture.asset('assets/icons/Inbox.svg', width: 23, height: 23, color: Palette.secondaryIcon),
+                            child: SvgPicture.asset(
+                              'assets/icons/Inbox.svg',
+                              width: 23,
+                              height: 23,
+                              color: Palette.secondaryIcon,
+                            ),
                           ),
-                          focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(24), borderSide: BorderSide(color: Palette.grey3, width: 2)),
-                          enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(24), borderSide: BorderSide(color: Palette.grey3)),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(24),
+                            borderSide: BorderSide(
+                              color: Palette.grey3,
+                              width: 2,
+                            ),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(24),
+                            borderSide: BorderSide(color: Palette.grey3),
+                          ),
                         ),
                       ),
                     ),
@@ -107,11 +142,23 @@ class _AdminLoginPageState extends State<AdminLoginPage> {
                         onPressed: _loading ? null : _requestCode,
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Palette.primary,
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(24),
+                          ),
                         ),
-                        child: _loading
-                            ? const CircularProgressIndicator(color: Palette.white)
-                            : const Text('Далее', style: TextStyle(fontSize: 16, fontFamily: 'Inter', color: Palette.white)),
+                        child:
+                            _loading
+                                ? const CircularProgressIndicator(
+                                  color: Palette.white,
+                                )
+                                : const Text(
+                                  'Далее',
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontFamily: 'Inter',
+                                    color: Palette.white,
+                                  ),
+                                ),
                       ),
                     ),
                   ],

@@ -38,9 +38,10 @@ class PaginationBar extends StatelessWidget {
               children: [
                 Expanded(
                   child: InkWell(
-                    onTap: currentPage > 1
-                        ? () => onPageChanged(currentPage - 1)
-                        : null,
+                    onTap:
+                        currentPage > 1
+                            ? () => onPageChanged(currentPage - 1)
+                            : null,
                     borderRadius: const BorderRadius.only(
                       topLeft: Radius.circular(15),
                       bottomLeft: Radius.circular(15),
@@ -52,24 +53,20 @@ class PaginationBar extends StatelessWidget {
                           'assets/icons/ArrowRight.svg',
                           width: 16,
                           height: 16,
-                          color: currentPage > 1
-                              ? Palette.black
-                              : Palette.grey3,
+                          color:
+                              currentPage > 1 ? Palette.black : Palette.grey3,
                         ),
                       ),
                     ),
                   ),
                 ),
-                Container(
-                  width: 1,
-                  height: 30,
-                  color: Palette.grey3,
-                ),
+                Container(width: 1, height: 30, color: Palette.grey3),
                 Expanded(
                   child: InkWell(
-                    onTap: currentPage < totalPages
-                        ? () => onPageChanged(currentPage + 1)
-                        : null,
+                    onTap:
+                        currentPage < totalPages
+                            ? () => onPageChanged(currentPage + 1)
+                            : null,
                     borderRadius: const BorderRadius.only(
                       topRight: Radius.circular(15),
                       bottomRight: Radius.circular(15),
@@ -79,9 +76,10 @@ class PaginationBar extends StatelessWidget {
                         'assets/icons/ArrowRight.svg',
                         width: 16,
                         height: 16,
-                        color: currentPage < totalPages
-                            ? Palette.black
-                            : Palette.grey3,
+                        color:
+                            currentPage < totalPages
+                                ? Palette.black
+                                : Palette.grey3,
                       ),
                     ),
                   ),

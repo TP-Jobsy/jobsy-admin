@@ -92,18 +92,18 @@ class _ProjectDetailPageState extends State<ProjectDetailPage> {
       try {
         await _adminService.deleteProject(project.id);
         Navigator.of(context).pop();
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Проект успешно удалён'),
-            backgroundColor: Palette.green,
-          ),
+        ErrorSnackbar.show(
+          context,
+          type: ErrorType.success,
+          title: 'Успех',
+          message: 'Проект успешно удален',
         );
       } catch (e) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Ошибка при удалении: $e'),
-            backgroundColor: Palette.red,
-          ),
+        ErrorSnackbar.show(
+          context,
+          type: ErrorType.error,
+          title: 'Ошибка при удалении',
+          message: '$e',
         );
       }
     }

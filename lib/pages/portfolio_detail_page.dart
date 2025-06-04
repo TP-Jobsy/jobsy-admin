@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:provider/provider.dart';
+import '../model/error_snackbar.dart';
 import '../model/portfolio/portfolio.dart';
 import '../provider/auth_provider.dart';
 import '../service/admin_service.dart';
@@ -130,21 +131,22 @@ class _PortfolioDetailPageState extends State<PortfolioDetailPage> {
                   if (confirm == true) {
                     try {
                       await _adminService.deletePortfolio(
-                        dto.freelancerId, dto.id,
+                        dto.freelancerId,
+                        dto.id,
                       );
                       Navigator.of(context).pop();
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Портфолио успешно удалено'),
-                          backgroundColor: Palette.green,
-                        ),
+                      ErrorSnackbar.show(
+                        context,
+                        type: ErrorType.success,
+                        title: 'Успех',
+                        message: 'Портфолио успешно удалено',
                       );
                     } catch (e) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text('Ошибка при удалении: $e'),
-                          backgroundColor: Palette.red,
-                        ),
+                      ErrorSnackbar.show(
+                        context,
+                        type: ErrorType.error,
+                        title: 'Ошибка при удалении',
+                        message: '$e',
                       );
                     }
                   }
