@@ -1,13 +1,29 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import '../../util/palette.dart';
+import '../model/error_snackbar.dart';
 import '../widgets/avatar.dart';
 
-class TopBar extends StatelessWidget {
+class TopBar extends StatefulWidget {
   final void Function(String)? onSearch;
   final VoidCallback? onFilter;
 
   const TopBar({super.key, this.onSearch, this.onFilter});
+
+  @override
+  State<TopBar> createState() => _TopBarState();
+}
+
+class _TopBarState extends State<TopBar> {
+  final TextEditingController _searchController = TextEditingController();
+  bool _isInputInvalid = false;
+  String _currentInput = '';
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -22,7 +38,7 @@ class TopBar extends StatelessWidget {
             Tooltip(
               message: 'Фильтрация',
               child: InkWell(
-                onTap: onFilter,
+                onTap: widget.onFilter,
                 borderRadius: BorderRadius.circular(8),
                 child: SvgPicture.asset(
                   'assets/icons/Filter.svg',
@@ -37,7 +53,7 @@ class TopBar extends StatelessWidget {
               child: ConstrainedBox(
                 constraints: BoxConstraints(
                   maxWidth:
-                      MediaQuery.of(context).size.width -
+                  MediaQuery.of(context).size.width -
                       (50 + 24 + 50 + 75 + 24),
                 ),
                 child: Container(
@@ -45,6 +61,9 @@ class TopBar extends StatelessWidget {
                   decoration: BoxDecoration(
                     color: Palette.white,
                     borderRadius: BorderRadius.circular(24),
+                    border: _isInputInvalid
+                        ? Border.all(color: Palette.red, width: 1)
+                        : null,
                     boxShadow: const [
                       BoxShadow(
                         color: Palette.black1,
@@ -60,17 +79,34 @@ class TopBar extends StatelessWidget {
                         'assets/icons/Search.svg',
                         width: 20,
                         height: 20,
-                        color: Palette.grey2,
+                        color: _isInputInvalid ? Palette.red : Palette.grey2,
                       ),
                       const SizedBox(width: 12),
                       Expanded(
                         child: TextField(
-                          decoration: const InputDecoration(
+                          controller: _searchController,
+                          decoration: InputDecoration(
                             hintText: 'Поиск',
                             border: InputBorder.none,
                             isDense: true,
+                            errorText: _isInputInvalid ? 'Превышен лимит в 30 символов' : null,
+                            errorStyle: const TextStyle(fontSize: 12),
                           ),
-                          onSubmitted: onSearch,
+                          onChanged: (value) {
+                            setState(() {
+                              _currentInput = value;
+                              _isInputInvalid = value.length > 30;
+                            });
+                          },
+                          onSubmitted: (value) {
+                            if (value.length <= 30) {
+                              widget.onSearch?.call(value);
+                            } else {
+                              setState(() {
+                                _isInputInvalid = true;
+                              });
+                            }
+                          },
                         ),
                       ),
                     ],

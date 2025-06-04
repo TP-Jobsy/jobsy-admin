@@ -59,12 +59,26 @@ class AdminService {
     await _api.delete<void>('/admin/clients/$userId');
   }
 
-  Future<List<Project>> getClientProjects(int clientId) async {
-    final json = await _api.get<List<dynamic>>(
-      '/admin/clients/$clientId/projects',
+  Future<ClientProfile> getClientByUserId(int userId) async {
+    final json = await _api.get<Map<String, dynamic>>(
+      '/admin/clients/$userId',
       decoder: (data) => data,
     );
-    return json!.cast<Map<String, dynamic>>().map(Project.fromJson).toList();
+    return ClientProfile.fromJson(json!);
+  }
+
+  Future<List<Project>> getClientProjects(int userId) async {
+    final clientProfile = await getClientByUserId(userId);
+    final clientProfileId = clientProfile.id;
+
+    final json = await _api.get<List<dynamic>>(
+      '/admin/clients/$clientProfileId/projects',
+      decoder: (data) => data,
+    );
+    return json!
+        .cast<Map<String, dynamic>>()
+        .map(Project.fromJson)
+        .toList();
   }
 
   Future<Project> getProjectById(int projectId) async {
