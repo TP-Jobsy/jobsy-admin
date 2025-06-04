@@ -62,7 +62,7 @@ class _TopBarState extends State<TopBar> {
                     color: Palette.white,
                     borderRadius: BorderRadius.circular(24),
                     border: _isInputInvalid
-                        ? Border.all(color: Colors.red, width: 1)
+                        ? Border.all(color: Palette.red, width: 1)
                         : null,
                     boxShadow: const [
                       BoxShadow(
@@ -79,7 +79,7 @@ class _TopBarState extends State<TopBar> {
                         'assets/icons/Search.svg',
                         width: 20,
                         height: 20,
-                        color: _isInputInvalid ? Colors.red : Palette.grey2,
+                        color: _isInputInvalid ? Palette.red : Palette.grey2,
                       ),
                       const SizedBox(width: 12),
                       Expanded(
